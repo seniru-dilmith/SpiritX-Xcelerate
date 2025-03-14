@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-const { sequelize } = require("./models");
+const { sequelize, createDatabse } = require("./models");
 
 const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
@@ -42,16 +42,29 @@ app.get("/", (req, res) => {
   res.send("Server is running");
 });
 
-// Sync database, populate data if CSV files exist, then start server
-sequelize
-  .sync({ alter: true })
-  .then(async () => {
+const startServer = async () => {
+  try {
+    console.log("🔄 Ensuring database exists...");
+    await createDatabse(); // Ensure the database is created before connecting
+    console.log("✅ Database check complete.");
+
+    console.log("🔄 Syncing database...");
+    await sequelize.sync({ alter: true });
+    console.log("✅ Database synced.");
+
+    console.log("🔄 Populating sample data if needed...");
     const populateData = require("./SampleDataPopulation");
     await populateData();
+    console.log("✅ Sample data populated.");
+
+    console.log(`🚀 Starting server on port ${PORT}...`);
     app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log(`✅ Server running on port ${PORT}`);
     });
-  })
-  .catch((err) => {
-    console.error("Unable to connect to the database:", err);
-  });
+  } catch (error) {
+    console.error("❌ Server startup error:", error);
+    process.exit(1); // Exit the process if something goes wrong
+  }
+};
+
+startServer();
