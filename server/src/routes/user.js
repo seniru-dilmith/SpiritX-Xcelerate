@@ -1,15 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Player, User, Team } = require('../models');
-
-// Middleware to check if user is authenticated
-const isAuthenticated = (req, res, next) => {
-  if (req.session.userId) {
-    next();
-  } else {
-    res.status(401).json({ message: 'Not authenticated' });
-  }
-};
+const { isAuthenticated } = require('../middleware/general');
 
 // Get all players (for users)
 router.get('/players', isAuthenticated, async (req, res) => {

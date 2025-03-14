@@ -4,6 +4,10 @@ module.exports = (sequelize) => {
   const Player = sequelize.define(
     "Player",
     {
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       university: {
         type: DataTypes.STRING,
         allowNull: false,

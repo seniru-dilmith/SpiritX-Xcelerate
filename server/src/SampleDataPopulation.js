@@ -14,7 +14,7 @@ function readCSV(filePath) {
   });
 }
 
-async function populateData() {
+module.exports = async function populateData() {
   const dataDir = path.join(__dirname, '..', 'data');
   
   if (!fs.existsSync(dataDir)) {
@@ -65,5 +65,3 @@ async function populateData() {
     console.log('teams.csv not found, skipping teams population.');
   }
 }
-
-module.exports = populateData;

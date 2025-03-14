@@ -1,24 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { Player, User } = require('../models');
-
-// Middleware to check admin rights
-const isAdmin = (req, res, next) => {
-  if (req.session.userId) {
-    User.findByPk(req.session.userId).then(user => {
-      if (user && user.isAdmin) {
-        next();
-      } else {
-        res.status(403).json({ message: 'Access denied' });
-      }
-    });
-  } else {
-    res.status(401).json({ message: 'Not authenticated' });
-  }
-};
+const { isAuthenticated } = require('../middleware/general');
+const { isAdmin } = require('../middleware/admin');
 
 // Get all players (admin view)
-router.get('/players', isAdmin, async (req, res) => {
+router.get('/players', isAuthenticated, isAdmin, async (req, res) => {
   try {
     const players = await Player.findAll();
     res.json(players);
@@ -28,7 +15,7 @@ router.get('/players', isAdmin, async (req, res) => {
 });
 
 // Get detailed player stats by ID
-router.get('/player-stats/:id', isAdmin, async (req, res) => {
+router.get('/player-stats/:id', isAuthenticated, isAdmin, async (req, res) => {
   try {
     const player = await Player.findByPk(req.params.id);
     if (!player) {
@@ -41,7 +28,7 @@ router.get('/player-stats/:id', isAdmin, async (req, res) => {
 });
 
 // Update player details
-router.put('/player/:id', isAdmin, async (req, res) => {
+router.put('/player/:id', isAuthenticated, isAdmin, async (req, res) => {
   try {
     const player = await Player.findByPk(req.params.id);
     if (!player) {
@@ -55,7 +42,7 @@ router.put('/player/:id', isAdmin, async (req, res) => {
 });
 
 // Delete a player (only allowed for newly added players)
-router.delete('/player/:id', isAdmin, async (req, res) => {
+router.delete('/player/:id', isAuthenticated, isAdmin, async (req, res) => {
   try {
     const player = await Player.findByPk(req.params.id);
     if (!player) {
@@ -69,7 +56,7 @@ router.delete('/player/:id', isAdmin, async (req, res) => {
 });
 
 // Create a new player
-router.post('/player', isAdmin, async (req, res) => {
+router.post('/player', isAuthenticated, isAdmin, async (req, res) => {
   try {
     const newPlayer = await Player.create(req.body);
     res.json({ message: 'Player created', player: newPlayer });
@@ -79,7 +66,7 @@ router.post('/player', isAdmin, async (req, res) => {
 });
 
 // Tournament summary endpoint
-router.get('/tournament-summary', isAdmin, async (req, res) => {
+router.get('/tournament-summary', isAuthenticated, isAdmin, async (req, res) => {
   try {
     const players = await Player.findAll();
     const overallRuns = players.reduce((acc, player) => acc + (player.runs || 0), 0);
