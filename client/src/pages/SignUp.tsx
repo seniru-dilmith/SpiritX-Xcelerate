@@ -5,11 +5,11 @@ import { z } from 'zod';
 import PasswordStrength from '../components/PasswordStrength';
 
 const signupSchema = z.object({
-  username: z.string().min(8, 'Username must be at least 8 characters'),
+  username: z.string().min(5, 'Username must be at least 5 characters'),
   password: z.string().min(8, 'Password must be at least 8 characters')
     .regex(/[a-z]/, 'Must contain a lowercase letter')
     .regex(/[A-Z]/, 'Must contain an uppercase letter')
-    .regex(/[!@#$%^&*(),.?":{}|<>]/, 'Must contain a special character'),
+    .regex(/[\W_]/, 'Must contain a special character'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",

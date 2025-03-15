@@ -1,17 +1,17 @@
 const { User } = require("../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { signupSchema } = require("../validation/signup");
 
 const signup = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password } = signupSchema.parse(req.body);
   try {
     // Check if username already exists
     const existingUser = await User.findOne({ where: { username } });
     if (existingUser) {
       return res.status(400).json({ message: "Username already exists" });
     }
-    const newUser = await User.create({ username, password });
-    req.session.userId = newUser.id;
+    await User.create({ username, password });
     res.json({ message: "User created successfully" });
   } catch (err) {
     res.status(500).json({ message: "Signup failed", error: err.message });
@@ -45,10 +45,12 @@ const login = async (req, res) => {
 
     // Set tokens as HttpOnly cookies with merged options
     res.cookie("accessToken", accessToken, {
+      sameSite: "Strict",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
     });
     res.cookie("refreshToken", refreshToken, {
+      sameSite: "Strict",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
     });
