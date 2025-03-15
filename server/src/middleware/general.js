@@ -16,26 +16,24 @@ const parseCookies = (req) => {
 
 const isAuthenticated = (req, res, next) => {
   const cookies = parseCookies(req);
-  const token = cookies.token;
+  const token = cookies.accessToken;
 
   if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Unauthorized: no token provided" });
   }
 
   try {
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
       if (err) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({ message: "Unauthorized: token verification failed" });
       }
 
       req.user = user;
       next();
     });
   } catch (err) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Unauthorized: unknown error" });
   }
 };
 
-module.exports = {
-  isAuthenticated,
-};
+module.exports = { isAuthenticated };

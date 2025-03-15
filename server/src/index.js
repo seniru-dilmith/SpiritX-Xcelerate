@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-const { sequelize, createDatabse } = require("./models");
+const { sequelize, createDatabase } = require("./models");
 
 const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
@@ -36,18 +36,20 @@ app.get("/", (req, res) => {
 
 const startServer = async () => {
   try {
-    console.log("🔄 Ensuring database exists...");
-    await createDatabse(); // Ensure the database is created before connecting
+    console.log("🔃 Ensuring database exists...");
+    const needToPopulate = await createDatabase(); // Ensure the database is created before connecting
     console.log("✅ Database check complete.");
 
-    console.log("🔄 Syncing database...");
+    console.log("🔃 Syncing database...");
     await sequelize.sync({ alter: true });
     console.log("✅ Database synced.");
 
-    console.log("🔄 Populating sample data if needed...");
-    const populateData = require("./SampleDataPopulation");
-    await populateData();
-    console.log("✅ Sample data populated.");
+    if (needToPopulate) {
+      console.log("🔃 Populating sample data if needed...");
+      const populateData = require("./SampleDataPopulation");
+      await populateData();
+      console.log("✅ Sample data populated.");
+    }
 
     console.log(`🚀 Starting server on port ${PORT}...`);
     app.listen(PORT, () => {

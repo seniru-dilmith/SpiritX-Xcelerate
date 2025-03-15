@@ -1,70 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { Player, User, Team } = require('../models');
 const { isAuthenticated } = require('../middleware/general');
+const { getAllPlayers, addPlayerToTeam, removePlayerFromTeam, remainingBudget, getLeaderboard } = require('../controllers/user');
 
 // Get all players (for users)
-router.get('/players', isAuthenticated, async (req, res) => {
-  try {
-    const players = await Player.findAll();
-    res.json(players);
-  } catch (err) {
-    res.status(500).json({ message: 'Error fetching players', error: err.message });
-  }
-});
+router.get('/players', isAuthenticated, getAllPlayers);
 
 // Add a player to the user's team
-router.post('/team/add', isAuthenticated, async (req, res) => {
-  const { playerId } = req.body;
-  try {
-    const existing = await Team.findOne({ where: { userId: req.session.userId, playerId } });
-    if (existing) {
-      return res.status(400).json({ message: 'Player already in team' });
-    }
-    const teamCount = await Team.count({ where: { userId: req.session.userId } });
-    if (teamCount >= 11) {
-      return res.status(400).json({ message: 'Team is already complete' });
-    }
-    const teamEntry = await Team.create({ userId: req.session.userId, playerId });
-    res.json(teamEntry);
-  } catch (err) {
-    res.status(500).json({ message: 'Error adding player to team', error: err.message });
-  }
-});
+router.post('/team/add', isAuthenticated, addPlayerToTeam);
 
 // Remove a player from the user's team
-router.post('/team/remove', isAuthenticated, async (req, res) => {
-  const { playerId } = req.body;
-  try {
-    const teamEntry = await Team.findOne({ where: { userId: req.session.userId, playerId } });
-    if (!teamEntry) {
-      return res.status(400).json({ message: 'Player not in team' });
-    }
-    await teamEntry.destroy();
-    res.json({ message: 'Player removed from team' });
-  } catch (err) {
-    res.status(500).json({ message: 'Error removing player from team', error: err.message });
-  }
-});
+router.post('/team/remove', isAuthenticated, removePlayerFromTeam);
 
 // Get the user's remaining budget
-router.get('/budget', isAuthenticated, async (req, res) => {
-  try {
-    const user = await User.findByPk(req.session.userId);
-    res.json({ budget: user.budget });
-  } catch (err) {
-    res.status(500).json({ message: 'Error fetching budget', error: err.message });
-  }
-});
+router.get('/budget', isAuthenticated, remainingBudget);
 
 // Get the leaderboard
-router.get('/leaderboard', isAuthenticated, async (req, res) => {
-  try {
-    const users = await User.findAll({ order: [['points', 'DESC']] });
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ message: 'Error fetching leaderboard', error: err.message });
-  }
-});
+router.get('/leaderboard', isAuthenticated, getLeaderboard);
 
 module.exports = router;
