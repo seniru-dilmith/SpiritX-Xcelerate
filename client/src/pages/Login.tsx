@@ -3,6 +3,7 @@ import { login } from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useAuth } from "../context/AuthContext";
+import { useLoading } from "../context/LoadingContext";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -14,7 +15,7 @@ const Login: React.FC = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [errors, setErrors] = useState<any>({});
   const [serverError, setServerError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { loading, setLoading } = useLoading();
   const { setUser } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
