@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getBudget } from '../api/api';
+import { getBudget } from '../api/axios';
 
 const Budget: React.FC = () => {
   const [budget, setBudget] = useState(0);

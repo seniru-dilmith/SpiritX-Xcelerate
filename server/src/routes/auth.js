@@ -1,5 +1,5 @@
 const express = require("express");
-const { signup, login, refreshTokens, logout } = require("../controllers/auth");
+const { signup, login, refreshTokens, logout, verifyCookies } = require("../controllers/auth");
 const router = express.Router();
 
 // Signup endpoint
@@ -13,5 +13,8 @@ router.post("/refresh", refreshTokens);
 
 // Logout endpoint
 router.post("/logout", logout);
+
+// Get current user
+router.get("/me", verifyCookies);
 
 module.exports = router;

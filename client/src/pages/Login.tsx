@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { login } from "../api/api";
+import { login } from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
+import { useAuth } from "../context/AuthContext";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -14,6 +15,7 @@ const Login: React.FC = () => {
   const [errors, setErrors] = useState<any>({});
   const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { setUser } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,7 +28,8 @@ const Login: React.FC = () => {
     try {
       loginSchema.parse(formData);
       setLoading(true);
-      await login(formData);
+      const response = await login(formData);
+      setUser(response.data.user);
       navigate("/home");
     } catch (err: any) {
       if (err.errors) {

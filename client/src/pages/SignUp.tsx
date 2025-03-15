@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { signup } from '../api/api';
+import { signup } from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import PasswordStrength from '../components/PasswordStrength';

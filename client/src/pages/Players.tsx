@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchPlayers } from '../api/api';
+import { fetchPlayers } from '../api/axios';
 
 const Players: React.FC = () => {
   const [players, setPlayers] = useState([]);

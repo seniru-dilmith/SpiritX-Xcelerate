@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
 });
 
@@ -11,6 +11,12 @@ export const signup = (data: { username: string; password: string; confirmPasswo
 
 export const login = (data: { username: string; password: string; }) =>
   API.post('/auth/login', data);
+
+// New API call to retrieve the current logged-in user
+export const fetchUser = () => API.get('/auth/me');
+
+// Refresh tokens 
+export const refreshTokens = () => API.post('/auth/refresh');
 
 // Other APIs
 export const fetchPlayers = () => API.get('/players');

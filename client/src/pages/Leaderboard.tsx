@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getLeaderboard } from '../api/api';
+import { getLeaderboard } from '../api/axios';
 
 const Leaderboard: React.FC = () => {
   const [leaderboard, setLeaderboard] = useState([]);

@@ -1,29 +1,35 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Signup from './pages/SignUp';
-import Login from './pages/Login';
-import Home from './pages/Home';
-import Players from './pages/Players';
-import Team from './pages/Team';
-import Budget from './pages/Budget';
-import Leaderboard from './pages/Leaderboard';
-import AdminPanel from './pages/AdminPanel';
-import Chatbot from './pages/Chatbot';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Signup from "./pages/SignUp";
+import Login from "./pages/Login";
+import Home from "./pages/Home";
+import Players from "./pages/Players";
+import Team from "./pages/Team";
+import Budget from "./pages/Budget";
+import Leaderboard from "./pages/Leaderboard";
+import AdminPanel from "./pages/AdminPanel";
+import Chatbot from "./pages/Chatbot";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/players" element={<Players />} />
-        <Route path="/team" element={<Team />} />
-        <Route path="/budget" element={<Budget />} />
-        <Route path="/leaderboard" element={<Leaderboard />} />
-        <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/chatbot" element={<Chatbot />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/home" element={<ProtectedRoute> <Home /> </ProtectedRoute>} />
+          <Route path="/players" element={<ProtectedRoute> <Players /> </ProtectedRoute>} />
+          <Route path="/team" element={<ProtectedRoute> <Team /> </ProtectedRoute>} />
+          <Route path="/budget" element={<ProtectedRoute> <Budget /> </ProtectedRoute>} />
+          <Route path="/leaderboard" element={<ProtectedRoute> <Leaderboard /> </ProtectedRoute>} />
+          <Route path="/chatbot" element={<ProtectedRoute> <Chatbot /> </ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute adminOnly> <AdminPanel /> </ProtectedRoute>} />
+          {/* Redirect any unmatched routes to /login */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

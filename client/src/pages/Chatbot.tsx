@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { sendChatbotMessage } from '../api/api';
+import { sendChatbotMessage } from '../api/axios';
 
 const Chatbot: React.FC = () => {
   const [message, setMessage] = useState('');

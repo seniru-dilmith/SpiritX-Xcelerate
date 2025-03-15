@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { addTeamPlayer, removeTeamPlayer } from '../api/api';
+import { addTeamPlayer, removeTeamPlayer } from '../api/axios';
 
 const Team: React.FC = () => {
   const [team, setTeam] = useState<any[]>([]);
