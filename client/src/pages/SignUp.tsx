@@ -3,6 +3,8 @@ import { signup } from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import PasswordStrength from '../components/PasswordStrength';
+import TitleBar from '../components/TitleBar';
+import Footer from '../components/Footer';
 
 const signupSchema = z.object({
   username: z.string().min(5, 'Username must be at least 5 characters'),
@@ -53,48 +55,52 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-4 border rounded">
-      <h2 className="text-2xl font-bold mb-4">Signup</h2>
-      {serverError && <div className="mb-2 text-red-500">{serverError}</div>}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block">Username</label>
-          <input 
-            type="text" 
-            name="username" 
-            value={formData.username} 
-            onChange={handleChange} 
-            className="w-full p-2 border rounded"
-          />
-          {errors.username && <p className="text-red-500">{errors.username}</p>}
-        </div>
-        <div className="mb-4">
-          <label className="block">Password</label>
-          <input 
-            type="password" 
-            name="password" 
-            value={formData.password} 
-            onChange={handleChange} 
-            className="w-full p-2 border rounded"
-          />
-          <PasswordStrength password={formData.password} />
-          {errors.password && <p className="text-red-500">{errors.password}</p>}
-        </div>
-        <div className="mb-4">
-          <label className="block">Confirm Password</label>
-          <input 
-            type="password" 
-            name="confirmPassword" 
-            value={formData.confirmPassword} 
-            onChange={handleChange} 
-            className="w-full p-2 border rounded"
-          />
-          {errors.confirmPassword && <p className="text-red-500">{errors.confirmPassword}</p>}
-        </div>
-        <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded" disabled={loading}>
-          {loading ? 'Signing up...' : 'Signup'}
-        </button>
-      </form>
+    <div className="bg-cover bg-center bg-[url('/welcome-bg.jpg')] min-h-screen">
+      <TitleBar title="SecureConnect-Spirit11" subtitle="Signup Page"/>
+      <div className="max-w-md mx-auto mt-10 p-4 border bg-white/70 rounded-4xl">
+        <h2 className="text-2xl font-bold mb-4">Signup</h2>
+        {serverError && <div className="mb-2 text-red-500 ">{serverError}</div>}
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block">Username</label>
+            <input 
+              type="text" 
+              name="username" 
+              value={formData.username} 
+              onChange={handleChange} 
+              className="w-full p-2 border rounded"
+            />
+            {errors.username && <p className="text-red-500">{errors.username}</p>}
+          </div>
+          <div className="mb-4">
+            <label className="block">Password</label>
+            <input 
+              type="password" 
+              name="password" 
+              value={formData.password} 
+              onChange={handleChange} 
+              className="w-full p-2 border rounded"
+            />
+            <PasswordStrength password={formData.password} />
+            {errors.password && <p className="text-red-500">{errors.password}</p>}
+          </div>
+          <div className="mb-4">
+            <label className="block">Confirm Password</label>
+            <input 
+              type="password" 
+              name="confirmPassword" 
+              value={formData.confirmPassword} 
+              onChange={handleChange} 
+              className="w-full p-2 border rounded"
+            />
+            {errors.confirmPassword && <p className="text-red-500">{errors.confirmPassword}</p>}
+          </div>
+          <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded" disabled={loading}>
+            {loading ? 'Signing up...' : 'Signup'}
+          </button>
+        </form>
+      </div>
+      <Footer  position="fixed"/>
     </div>
   );
 };

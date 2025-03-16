@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useAuth } from "../context/AuthContext";
 import { useLoading } from "../context/LoadingContext";
+import Footer from "../components/Footer";
+import TitleBar from "../components/TitleBar";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -48,46 +50,50 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="flex flex-col items-center justify-center text-center max-w-md mx-auto mt-10 p-6 border rounded shadow-lg bg-white">
-        <h2 className="text-2xl font-bold mb-4">Login</h2>
-        {serverError && <div className="mb-2 text-red-500">{serverError}</div>}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block">Username</label>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-            {errors.username && (
-              <p className="text-red-500">{errors.username}</p>
-            )}
-          </div>
-          <div className="mb-4">
-            <label className="block">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-            {errors.password && (
-              <p className="text-red-500">{errors.password}</p>
-            )}
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white p-2 rounded"
-            disabled={loading}
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </form>
+    <div className="bg-cover bg-center bg-[url('/welcome-bg.jpg')] min-h-screen">
+      <TitleBar title="SecureConnect-Spirit11" subtitle="Login Page"/>
+      <div className="flex items-center justify-center ">
+        <div className="flex flex-col items-center justify-center text-center max-w-md mx-auto mt-10 p-12 border rounded-4xl shadow-lg bg-white/70">
+          <h2 className="text-2xl font-bold mb-4">Login</h2>
+          {serverError && <div className="mb-2 text-red-500">{serverError}</div>}
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="block">Username</label>
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+              />
+              {errors.username && (
+                <p className="text-red-500">{errors.username}</p>
+              )}
+            </div>
+            <div className="mb-4">
+              <label className="block">Password</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+              />
+              {errors.password && (
+                <p className="text-red-500">{errors.password}</p>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-500 text-white p-2 rounded"
+              disabled={loading}
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+          </form>
+        </div>
       </div>
+      <Footer position="fixed"/>
     </div>
   );
 };

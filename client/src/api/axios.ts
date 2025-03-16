@@ -28,7 +28,7 @@ export const fetchUser = async () =>
   API.get('/auth/me');
 
 // Refresh tokens endpoint
-export const refreshTokens = () => 
+export const refreshToken = () => 
   API.post('/auth/refresh');
 
 // Logout endpoint
@@ -73,3 +73,25 @@ export const getLeaderboard = () =>
 // ========== Chatbot API ==========
 export const sendChatbotMessage = (message: string) =>
   API.post('/chatbot', { message });
+
+// Response interceptor to auto-refresh token on 401 errors
+API.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    // Check for a 401 error and ensure we haven't already retried
+    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      try {
+        // Attempt to refresh tokens
+        await refreshToken();
+        // Reattempt the original request
+        return API(originalRequest);
+      } catch (refreshError) {
+        // If refresh fails, optionally redirect to login or handle logout logic
+        return Promise.reject(refreshError);
+      }
+    }
+    return Promise.reject(error);
+  }
+);

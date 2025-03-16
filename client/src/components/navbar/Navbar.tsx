@@ -49,7 +49,7 @@ const Navbar: React.FC = () => {
             animate="visible"
             exit="exit"
             variants={popupVariants}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+            className="fixed inset-0 flex items-center justify-center bg-black/50"
           >
             <div className="p-4 bg-white rounded shadow-lg">
               {logoutPopup}
