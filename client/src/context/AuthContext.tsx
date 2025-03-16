@@ -21,20 +21,24 @@ export const AuthProvider = ({ children } : { children:ReactNode } ) => {
     const [ loading, setLoading ] = useState(true);
 
     useEffect(() => {
-        fetchUser()
-        .then(res => {
-            console.log(res.data);
-            
-            if (res.data && res.data.user) {
-                setUser(res.data.user);
+        const fetchData = async () => {
+            try {
+                const res = await fetchUser();
+                if (res.data && res.data.user) {
+                    setUser(res.data.user);
+                }
+            } catch (err) {
+                if (err instanceof Error) {
+                    console.error("No authenticated user found", err.message);
+                } else {
+                    console.error("No authenticated user found", err);
+                }
+            } finally {
+                setLoading(false);
             }
-        })
-        .catch(err => {
-            console.error("No authenticated user found", err.message);
-        })
-        .finally(() => {
-            setLoading(false);
-        });
+        };
+
+        fetchData();
     }, []);
 
     return (

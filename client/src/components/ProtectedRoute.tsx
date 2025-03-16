@@ -14,10 +14,6 @@ const PritectedRoute: React.FC<ProtectedRouteProps> = ({ adminOnly, children }: 
         return <Navigate to="/" />;        
     }
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
     if (adminOnly && !user?.isAdmin) {
         return (
             <div className="p-4 text-center text-red-500 mt-10">

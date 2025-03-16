@@ -137,8 +137,9 @@ const verifyCookies = (req, res) => {
 };
 
 const logout = (req, res) => {
-  req.session.destroy();
-  res.json({ message: "Logged out successfully" });
+  res.clearCookie('accessToken', { sameSite: 'Strict', secure: process.env.NODE_ENV === 'production' });
+  res.clearCookie('refreshToken', { sameSite: 'Strict', secure: process.env.NODE_ENV === 'production' });
+  res.json({ message: "logging out..." });
 };
 
 module.exports = { signup, login, refreshTokens, verifyCookies, logout };
