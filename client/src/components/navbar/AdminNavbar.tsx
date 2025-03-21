@@ -25,9 +25,6 @@ const AdminNavbar: React.FC<NavbarProps> = ({ onLogout }) => {
         {/* Desktop menu */}
         <div className="hidden md:flex space-x-4">
           <Link to="/home" className="hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105"> Home </Link>
-          <Link to="/players" className="hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105"> Players </Link>
-          <Link to="/team" className="hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105"> Team </Link>
-          <Link to="/budget" className="hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105" > Budget </Link>
           <Link to="/leaderboard" className="hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105" > Leaderboard </Link>
           <Link to="/chatbot" className="hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105" > Chatbot </Link>
           <Link to="/admin" className="hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105"> Admin Panel </Link>
@@ -59,9 +56,6 @@ const AdminNavbar: React.FC<NavbarProps> = ({ onLogout }) => {
           >
             <ul className="flex flex-col space-y-2">
               <li> <Link to="/home" className="block hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300" onClick={() => setIsOpen(false)} > Home </Link> </li>
-              <li> <Link to="/players" className="block hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300" onClick={() => setIsOpen(false)} > Players  </Link> </li>
-              <li> <Link to="/team" className="block hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300" onClick={() => setIsOpen(false)} > Team </Link> </li>
-              <li> <Link to="/budget" className="block hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300" onClick={() => setIsOpen(false)} > Budget </Link> </li>
               <li> <Link to="/leaderboard" className="block hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300" onClick={() => setIsOpen(false)} > Leaderboard </Link> </li>
               <li> <Link to="/chatbot" className="block hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300" onClick={() => setIsOpen(false)} > Chatbot </Link> </li>
               <li> <Link to="/admin" className="block hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300" onClick={() => setIsOpen(false)} > Admin Panel </Link> </li>

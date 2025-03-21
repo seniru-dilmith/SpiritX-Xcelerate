@@ -18,7 +18,7 @@ const Home: React.FC = () => {
     <div className="relative min-h-screen bg-gradient-to-br from-indigo-800 to-blue-300 overflow-hidden">
       <CricketDecorations />
       {/* HERO SECTION */}
-      <section className="flex items-center justify-center min-h-screen relative z-10 px-4">
+      <section className="flex items-center justify-center min-h-screen relative px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 0.98, y: 0 }}
@@ -57,7 +57,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* FEATURES SECTION */}
-      <section className="py-16 relative z-10">
+      <section className="py-16 relative ">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0 }}
@@ -115,7 +115,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* HOW IT WORKS SECTION */}
-      <section className="py-16 relative z-10">
+      <section className="py-16 relative ">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0 }}
@@ -167,7 +167,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* TESTIMONIALS SECTION */}
-      <section className="py-16 relative z-10">
+      <section className="py-16 relative ">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0 }}
@@ -208,7 +208,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* CALL TO ACTION SECTION */}
-      <section className="py-16 relative z-10">
+      <section className="py-16 relative ">
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0 }}
