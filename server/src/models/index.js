@@ -55,4 +55,8 @@ const Team = require("./Team")(sequelize);
 User.belongsToMany(Player, { through: Team, foreignKey: "userId" });
 Player.belongsToMany(User, { through: Team, foreignKey: "playerId" });
 
+// Explicit associations for eager loading:
+Team.belongsTo(Player, { foreignKey: "playerId" });
+Team.belongsTo(User, { foreignKey: "userId" });
+
 module.exports = { sequelize, User, Player, Team, createDatabase };

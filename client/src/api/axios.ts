@@ -70,6 +70,9 @@ export const getBudget = () =>
 export const getLeaderboard = () => 
   API.get('/leaderboard');
 
+export const fetchTeam = () =>
+  API.get('/team');
+
 // ========== Chatbot API ==========
 export const sendChatbotMessage = (message: string) =>
   API.post('/chatbot', { message });

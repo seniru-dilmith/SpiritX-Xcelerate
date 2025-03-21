@@ -6,7 +6,13 @@ const Budget: React.FC = () => {
 
   useEffect(() => {
     getBudget()
-      .then(res => setBudget(res.data.budget))
+      .then(res => {
+        console.log(res);
+        
+        setBudget(res.data.budget);
+        console.log("123");
+        
+      })
       .catch(err => console.error(err));
   }, []);
 

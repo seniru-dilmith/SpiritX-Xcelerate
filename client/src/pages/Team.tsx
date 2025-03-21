@@ -1,19 +1,32 @@
-import React, { useState } from 'react';
-import { addTeamPlayer, removeTeamPlayer } from '../api/axios';
+import React, { useEffect, useState } from 'react';
+import { fetchTeam, removeTeamPlayer } from '../api/axios';
 
 const Team: React.FC = () => {
   const [team, setTeam] = useState<any[]>([]);
 
-  const handleAdd = (playerId: number) => {
-    addTeamPlayer(playerId).then(res => {
-      setTeam([...team, res.data]);
-    });
+  const fetchTeamData = async () => {
+    try {
+      const res = await fetchTeam();
+      setTeam(res.data);
+    }
+    catch (err) {
+      console.error("Error fetching team data", err);
+    }
   };
 
-  const handleRemove = (playerId: number) => {
-    removeTeamPlayer(playerId).then(() => {
+  // Fetch team on component mount
+  useEffect(() => {
+    fetchTeamData(), []
+  });
+
+  const handleRemove = async (playerId: number) => {
+    try {
+      await removeTeamPlayer(playerId);
       setTeam(team.filter(player => player.id !== playerId));
-    });
+      await fetchTeamData();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -23,10 +36,10 @@ const Team: React.FC = () => {
         <p>No players in your team yet.</p>
       ) : (
         <ul>
-          {team.map((player: any) => (
-            <li key={player.id} className="border p-2 my-2 flex justify-between items-center">
-              <span>{player.name} ({player.university})</span>
-              <button className="bg-red-500 text-white p-1 rounded" onClick={() => handleRemove(player.id)}>Remove</button>
+          {team.map((record: any) => (
+            <li key={record.Player.id} className="border p-2 my-2 flex justify-between items-center">
+              <span>{record.Player.name} ({record.Player.university})</span>
+              <button className="bg-red-500 text-white p-1 rounded" onClick={() => handleRemove(record.Player.id)}>Remove</button>
             </li>
           ))}
         </ul>

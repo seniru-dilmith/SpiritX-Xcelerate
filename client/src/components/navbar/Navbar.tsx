@@ -51,7 +51,7 @@ const Navbar: React.FC = () => {
             variants={popupVariants}
             className="fixed inset-0 flex items-center justify-center bg-black/50"
           >
-            <div className="p-4 bg-white rounded shadow-lg">
+            <div className="p-4 bg-white rounded shadow-lg z-50">
               {logoutPopup}
             </div>
           </motion.div>

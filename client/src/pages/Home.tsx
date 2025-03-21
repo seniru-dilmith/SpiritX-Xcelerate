@@ -220,16 +220,6 @@ const Home: React.FC = () => {
             <p className="mt-4 text-lg text-gray-600">
               Sign up now and become a part of the SecureConnect-Spirit11 community.
             </p>
-            <div className="mt-8">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate("/signup")}
-                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded shadow-lg hover:bg-blue-700 transition duration-300"
-              >
-                Sign Up Today
-              </motion.button>
-            </div>
           </motion.div>
         </div>
       </section>

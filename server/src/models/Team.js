@@ -1,13 +1,24 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  const Team = sequelize.define('Team', {
-    // This join table links users and players. Additional attributes can be added if needed.
-  }
-  ,{
-    tableName: 'Team',
-    freezeTableName: true,
-  });
+  const Team = sequelize.define(
+    "Team",
+    {
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: { model: "User", key: "id" },
+      },
+      playerId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: { model: "Player", key: "id" },
+      },
+    },
+    {
+      freezeTableName: true,
+    }
+  );
 
   return Team;
 };

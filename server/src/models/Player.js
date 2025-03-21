@@ -46,7 +46,7 @@ module.exports = (sequelize) => {
       value_in_rupees: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
-      }
+      },
     },
     {
       tableName: "Player",
@@ -70,7 +70,9 @@ module.exports = (sequelize) => {
   function calculatePlayerPoints(player) {
     // Batting Strike Rate
     let batting_strike_rate =
-      player.balls_faced > 0 ? (player.total_runs / player.balls_faced) * 100 : 0;
+      player.balls_faced > 0
+        ? (player.total_runs / player.balls_faced) * 100
+        : 0;
 
     // Batting Average
     let batting_average =
