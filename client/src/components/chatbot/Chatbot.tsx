@@ -1,23 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
 import { sendChatbotMessage } from "../../api/axios";
 import { motion } from "framer-motion";
-
-// Lazy initializer to load chat history from localStorage.
-const getInitialChat = () => {
-  const storedChat = localStorage.getItem("chatHistory");
-  return storedChat ? JSON.parse(storedChat) : [];
-};
+import ReactMarkdown from "react-markdown";
+import { useAuth } from "../../context/AuthContext";
 
 const Chatbot: React.FC = () => {
   const [message, setMessage] = useState("");
-  const [chat, setChat] = useState<{ sender: string; text: string }[]>(getInitialChat);
+  const [chat, setChat] = useState<{ sender: string; text: string }[]>([]);
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const [isUserAtBottom, setIsUserAtBottom] = useState(true);
+  const { user } = useAuth();
 
   const handleSend = async () => {
     if (!message.trim()) return;
 
-    const userMsg = { sender: "You", text: message };
+    const userMsg = { sender: user?.name || "You", text: message };
     setChat((prev) => [...prev, userMsg]);
 
     try {
@@ -31,11 +28,6 @@ const Chatbot: React.FC = () => {
 
     setMessage("");
   };
-
-  // Save chat history to localStorage whenever it changes.
-  useEffect(() => {
-    localStorage.setItem("chatHistory", JSON.stringify(chat));
-  }, [chat]);
 
   const scrollToBottom = () => {
     requestAnimationFrame(() => {
@@ -56,7 +48,7 @@ const Chatbot: React.FC = () => {
   const handleScroll = () => {
     const container = chatContainerRef.current;
     if (container) {
-      const threshold = 100;
+      const threshold = 100; // px from bottom
       const distanceFromBottom =
         container.scrollHeight - container.scrollTop - container.clientHeight;
       setIsUserAtBottom(distanceFromBottom < threshold);
@@ -70,26 +62,29 @@ const Chatbot: React.FC = () => {
         onScroll={handleScroll}
         className="min-h-72 max-h-[450px] overflow-y-auto p-4 space-y-4 bg-gray-50 scroll-smooth"
       >
-        {chat.map((msg, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className={`flex ${msg.sender === "You" ? "justify-end" : "justify-start"}`}
-          >
-            <div
-              className={`px-4 py-2 max-w-[75%] rounded-lg text-sm ${
-                msg.sender === "You"
-                  ? "bg-blue-500 text-white rounded-br-none"
-                  : "bg-gray-200 text-gray-800 rounded-bl-none"
-              }`}
+        {chat.map((msg, index) => {
+          const isUserMessage = msg.sender === (user?.name || "You");
+          return (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className={`flex ${isUserMessage ? "justify-end" : "justify-start"}`}
             >
-              <span className="block font-medium mb-1">{msg.sender}</span>
-              <span>{msg.text}</span>
-            </div>
-          </motion.div>
-        ))}
+              <div
+                className={`px-4 py-2 max-w-[75%] rounded-lg text-sm ${
+                  isUserMessage
+                    ? "bg-blue-500 text-white rounded-br-none"
+                    : "bg-gray-200 text-gray-800 rounded-bl-none"
+                }`}
+              >
+                <span className="block font-medium mb-1">{msg.sender}</span>
+                <ReactMarkdown>{msg.text}</ReactMarkdown>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
 
       <div className="flex border-t p-4 gap-2">

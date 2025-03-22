@@ -1,24 +1,32 @@
-const axios = require('axios');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 const askChatbot = async (req, res) => {
-    const { message } = req.body;
-    try {
-      // Here you would call the Gemini API using axios (or another HTTP client)
-      // For now, we simulate a response.
-      let botResponse = '';
-  
-      if (message.toLowerCase().includes('player')) {
-        botResponse = 'Here is some information about the player.';
-      } else if (message.toLowerCase().includes('best team')) {
-        botResponse = 'The best possible team is [dummy team list].';
-      } else {
-        botResponse = "I don't have enough knowledge to answer that question.";
-      }
-  
-      res.json({ response: botResponse });
-    } catch (err) {
-      res.status(500).json({ message: 'Error communicating with chatbot', error: err.message });
+  const { message } = req.body;
+  try {
+    let botResponse = "";
+
+    const prompt = req.body.message;
+
+    const result = await model.generateContent(prompt);
+
+    if (result) {
+      botResponse = result.response.text();
+    } else {
+      botResponse = "I don't have enough knowledge to answer that question.";
     }
+
+    res.json({ response: botResponse });
+  } catch (err) {
+    res
+      .status(500)
+      .json({
+        message: "Error communicating with chatbot",
+        error: err.message,
+      });
   }
+};
 
 module.exports = { askChatbot };

@@ -27,6 +27,7 @@ const Navbar: React.FC = () => {
       setTimeout(() => {
         setLogoutPopup(null);
         setUser(null);
+        localStorage.removeItem("chatHistory");
         navigate("/");
       }, 2000);
     } catch (err) {
