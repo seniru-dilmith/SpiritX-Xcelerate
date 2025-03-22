@@ -8,9 +8,7 @@ const askChatbot = async (req, res) => {
   try {
     let botResponse = "";
 
-    const prompt = req.body.message;
-
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent(message);
 
     if (result) {
       botResponse = result.response.text();
