@@ -91,17 +91,6 @@ const Leaderboard: React.FC = () => {
     setCurrentPage(1);
   };
 
-  // Pagination controls
-  const handlePreviousPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(prev => prev + 1);
-    }
-  };
-
   // Handle adding a player to team (integrated from Players.tsx)
   const handleAddToTeam = async (playerId: number) => {
     try {
