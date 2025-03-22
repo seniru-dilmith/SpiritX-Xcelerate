@@ -6,7 +6,7 @@ import Team from "./pages/Team";
 import Budget from "./pages/Budget";
 import Leaderboard from "./pages/Leaderboard";
 import AdminPanel from "./pages/AdminPanel";
-import Chatbot from "./pages/Chatbot";
+import Chatbot from "./components/chatbot/Chatbot";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import { LoadingProvider } from "./context/LoadingContext";

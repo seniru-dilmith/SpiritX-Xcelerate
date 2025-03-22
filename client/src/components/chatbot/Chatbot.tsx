@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { sendChatbotMessage } from "../api/axios";
+import { sendChatbotMessage } from "../../api/axios";
 import { motion } from "framer-motion";
 
 const Chatbot: React.FC = () => {
@@ -57,10 +57,6 @@ const Chatbot: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto mt-10 bg-white rounded-lg shadow-xl border border-gray-200">
-      <div className="bg-blue-600 text-white px-6 py-4 rounded-t-lg text-center text-xl font-semibold">
-        🧠 Spiriter Chatbot
-      </div>
-
       <div
         ref={chatContainerRef}
         onScroll={handleScroll}
