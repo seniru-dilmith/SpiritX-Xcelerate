@@ -1,9 +1,9 @@
-const { Player, User, Team } = require("../models");
+const { Player, User, Team, Transaction } = require("../models");
 
 const getAllPlayers = async (req, res) => {
   try {
     const players = await Player.findAll();
-    
+
     res.json(players);
   } catch (err) {
     res
@@ -25,9 +25,36 @@ const addPlayerToTeam = async (req, res) => {
     if (teamCount >= 11) {
       return res.status(400).json({ message: "Team is already complete" });
     }
-    await Team.create({ userId: req.user.id, playerId });
-    return res.json({ message: "Player added to team successfully..."});
+    const player = await Player.findByPk(playerId);
+    if (!player) {
+      return res.status(404).json({ message: "Player not found" });
+    }
+    const user = await User.findByPk(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (user.budget < player.value_in_rupees) {
+      return res
+        .status(400)
+        .json({ message: "Insufficient budget to buy this player" });
+    }
+    user.budget -= player.value_in_rupees;
+    await user.save();
+    const teamEntry = await Team.create({ userId: req.user.id, playerId });
+    // Create a transaction record for the purchase
+    await Transaction.create({
+      userId: req.user.id,
+      playerId,
+      type: "purchase",
+      amount: player.value_in_rupees,
+    });
+    res.json({
+      message: "Player added to team successfully",
+      teamEntry,
+      budget: user.budget,
+    });
   } catch (err) {
+    console.error("Error in addPlayerToTeam:", err);
     res
       .status(500)
       .json({ message: "Error adding player to team", error: err.message });
@@ -37,18 +64,32 @@ const addPlayerToTeam = async (req, res) => {
 const removePlayerFromTeam = async (req, res) => {
   const { playerId } = req.body;
   try {
-    const teamEntry = await Team.findOne({
-      where: { userId: req.user.id, playerId },
-    });
+    const teamEntry = await Team.findOne({ where: { userId: req.user.id, playerId } });
     if (!teamEntry) {
       return res.status(400).json({ message: "Player not in team" });
     }
+    const player = await Player.findByPk(playerId);
+    if (!player) {
+      return res.status(404).json({ message: "Player not found" });
+    }
+    const user = await User.findByPk(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    user.budget += player.value_in_rupees;
+    await user.save();
     await teamEntry.destroy();
-    res.json({ message: "Player removed from team" });
+    // Create a transaction record for the sale
+    await Transaction.create({
+      userId: req.user.id,
+      playerId,
+      type: 'sale',
+      amount: player.value_in_rupees,
+    });
+    res.json({ message: "Player removed from team successfully", budget: user.budget });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error removing player from team", error: err.message });
+    console.error("Error in removePlayerFromTeam:", err);
+    res.status(500).json({ message: "Error removing player from team", error: err.message });
   }
 };
 
@@ -65,8 +106,40 @@ const remainingBudget = async (req, res) => {
 
 const getLeaderboard = async (req, res) => {
   try {
-    const users = await User.findAll({ order: [["points", "DESC"]] });
-    res.json(users);
+    const sortBy = req.query.sortBy || "overall";
+    const order = (req.query.order || "ASC").toUpperCase();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+
+    let orderClause;
+    if (sortBy === "overall") {
+      orderClause = [["points", order]];
+    } else if (
+      [
+        "name",
+        "total_runs",
+        "balls_faced",
+        "innings_played",
+        "wickets",
+        "overs_bowled",
+        "runs_conceded",
+        "value_in_rupees",
+      ].includes(sortBy)
+    ) {
+      orderClause = [[sortBy, order]];
+    } else {
+      orderClause = [["points", order]];
+    }
+
+    const result = await Player.findAndCountAll({
+      order: orderClause,
+      limit,
+      offset,
+    });
+
+    // Return both the data rows and the total count
+    res.json({ rows: result.rows, count: result.count });
   } catch (err) {
     res
       .status(500)
@@ -78,13 +151,15 @@ const getTeam = async (req, res) => {
   try {
     const team = await Team.findAll({
       where: { userId: req.user.id },
-      include: [{ model: Player }]
+      include: [{ model: Player }],
     });
-    
+
     res.json(team);
   } catch (err) {
     console.error("Error fetching team:", err);
-    res.status(500).json({ message: 'Error fetching team', error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching team", error: err.message });
   }
 };
 

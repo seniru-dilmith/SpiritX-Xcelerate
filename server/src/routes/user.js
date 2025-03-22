@@ -4,6 +4,7 @@ const router = express.Router();
 const { isAuthenticated } = require('../middleware/general');
 const { isUser } = require('../middleware/user'); 
 const { getAllPlayers, addPlayerToTeam, removePlayerFromTeam, remainingBudget, getLeaderboard, getTeam } = require('../controllers/user');
+const { getTransactions } = require('../controllers/transaction');
 
 // Get all players (for regular users)
 router.get('/players', isAuthenticated, isUser, getAllPlayers);
@@ -22,5 +23,8 @@ router.get('/leaderboard', isAuthenticated, isUser, getLeaderboard);
 
 // Get the user's team
 router.get('/team', isAuthenticated, isUser, getTeam);
+
+// Get the transactions for the user
+router.get('/transactions', isAuthenticated, isUser, getTransactions);
 
 module.exports = router;

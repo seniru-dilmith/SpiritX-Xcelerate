@@ -50,6 +50,7 @@ const createDatabase = async () => {
 const User = require("./User")(sequelize);
 const Player = require("./Player")(sequelize);
 const Team = require("./Team")(sequelize);
+const Transaction = require("./Transaction")(sequelize);
 
 // associations
 User.belongsToMany(Player, { through: Team, foreignKey: "userId" });
@@ -59,4 +60,10 @@ Player.belongsToMany(User, { through: Team, foreignKey: "playerId" });
 Team.belongsTo(Player, { foreignKey: "playerId" });
 Team.belongsTo(User, { foreignKey: "userId" });
 
-module.exports = { sequelize, User, Player, Team, createDatabase };
+// Associations for Transaction model
+User.hasMany(Transaction, { foreignKey: 'userId' });
+Transaction.belongsTo(User, { foreignKey: 'userId' });
+Player.hasMany(Transaction, { foreignKey: 'playerId' });
+Transaction.belongsTo(Player, { foreignKey: 'playerId' });
+
+module.exports = { sequelize, User, Player, Team, Transaction, createDatabase };

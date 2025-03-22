@@ -24,7 +24,6 @@ const UserNavbar: React.FC<NavbarProps> = ({ onLogout }) => {
         </div>
         {/* Desktop menu */}
         <div className="hidden md:flex space-x-4"> <Link to="/home" className="hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105" > Home </Link> 
-          <Link to="/players" className="hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105" > Players </Link>
           <Link to="/team" className="hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105" > Team </Link>
           <Link to="/budget" className="hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105" > Budget </Link>
           <Link to="/leaderboard" className="hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105" > Leaderboard </Link>

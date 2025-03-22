@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Signup from "./pages/SignUp";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
-import Players from "./pages/Players";
 import Team from "./pages/Team";
 import Budget from "./pages/Budget";
 import Leaderboard from "./pages/Leaderboard";
@@ -25,7 +24,6 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route element={<Layout />}>
               <Route path="/home" element={<ProtectedRoute> <Home /> </ProtectedRoute>} />
-              <Route path="/players" element={<ProtectedRoute> <Players /> </ProtectedRoute>} />
               <Route path="/team" element={<ProtectedRoute> <Team /> </ProtectedRoute>} />
               <Route path="/budget" element={<ProtectedRoute> <Budget /> </ProtectedRoute>} />
               <Route path="/leaderboard" element={<ProtectedRoute> <Leaderboard /> </ProtectedRoute>} />
