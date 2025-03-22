@@ -1,7 +1,13 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { getLeaderboard, fetchTeam, addTeamPlayer } from '../api/axios';
-import { motion } from 'framer-motion';
-import { useLoading } from '../context/LoadingContext';
+import React, { useEffect, useState, useCallback } from "react";
+import {
+  getLeaderboardForAdmin,
+  getLeaderboardForUser,
+  fetchTeam,
+  addTeamPlayer,
+} from "../api/axios";
+import { motion } from "framer-motion";
+import { useLoading } from "../context/LoadingContext";
+import { useAuth } from "../context/AuthContext";
 
 interface Player {
   id: number;
@@ -14,47 +20,51 @@ interface Player {
   overs_bowled: number;
   runs_conceded: number;
   value_in_rupees: number;
-  points: number; // used for overall sorting (hidden)
+  points: number; // used for overall sorting (only for admins)
   inTeam?: boolean;
 }
 
 const sortingOptions = [
-  { label: 'Name', value: 'name' },
-  { label: 'Total Runs', value: 'total_runs' },
-  { label: 'Balls Faced', value: 'balls_faced' },
-  { label: 'Innings Played', value: 'innings_played' },
-  { label: 'Wickets', value: 'wickets' },
-  { label: 'Overs Bowled', value: 'overs_bowled' },
-  { label: 'Runs Conceded', value: 'runs_conceded' },
-  { label: 'Value', value: 'value_in_rupees' },
-  { label: 'Overall Performance', value: 'overall' },
+  { label: "Name", value: "name" },
+  { label: "Total Runs", value: "total_runs" },
+  { label: "Balls Faced", value: "balls_faced" },
+  { label: "Innings Played", value: "innings_played" },
+  { label: "Wickets", value: "wickets" },
+  { label: "Overs Bowled", value: "overs_bowled" },
+  { label: "Runs Conceded", value: "runs_conceded" },
+  { label: "Value", value: "value_in_rupees" },
+  { label: "Overall Performance", value: "overall" },
 ];
 
 const Leaderboard: React.FC = () => {
   const [players, setPlayers] = useState<Player[]>([]);
-  const [message, setMessage] = useState<string>('');
-  const [sortBy, setSortBy] = useState<string>('overall'); // default sort: overall (by points)
-  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC'); // overall descending by default
+  const [message, setMessage] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("overall");
+  const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(20);
   const [totalPages, setTotalPages] = useState<number>(1);
   const { loading, setLoading } = useLoading();
+  const { user, loading: authLoading } = useAuth();
 
-  // Load data with sorting and pagination
+  // Wait for the user to be available before loading data.
   const loadData = useCallback(async () => {
+    if (!user) return;
     try {
       setLoading(true);
+      const leaderboardApi = user.isAdmin ? getLeaderboardForAdmin : getLeaderboardForUser;
+      const teamPromise =
+        user.isAdmin ? Promise.resolve({ data: [] }) : fetchTeam();
       const [leaderboardRes, teamRes] = await Promise.all([
-        getLeaderboard(sortBy, sortOrder, currentPage, pageSize),
-        fetchTeam()
+        leaderboardApi(sortBy, sortOrder, currentPage, pageSize),
+        teamPromise,
       ]);
-      // Expect leaderboardRes.data = { rows: Player[], count: number }
       const { rows, count } = leaderboardRes.data;
       setTotalPages(Math.ceil(count / pageSize));
       const teamPlayerIds = teamRes.data.map((record: any) => record.playerId);
       const mergedPlayers: Player[] = rows.map((player: Player) => ({
         ...player,
-        inTeam: teamPlayerIds.includes(player.id)
+        inTeam: teamPlayerIds.includes(player.id),
       }));
       setPlayers(mergedPlayers);
     } catch (err: any) {
@@ -63,35 +73,43 @@ const Leaderboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [sortBy, sortOrder, currentPage, pageSize, setLoading]);
+  }, [sortBy, sortOrder, currentPage, pageSize, setLoading, user]);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    if (!authLoading && user) {
+      loadData();
+    }
+  }, [loadData, authLoading, user]);
 
-  // Handle change in sort column; reset page to 1.
+  // When sort column changes, update sortBy and reset sortOrder to ASC.
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = e.target.value;
     if (selected !== sortBy) {
       setSortBy(selected);
-      setSortOrder('ASC'); // reset order to ascending for new column
+      setSortOrder("ASC");
     }
     setCurrentPage(1);
   };
 
-  // Toggle sort order for current column; reset page to 1.
+  // Separate toggle button for sort order.
   const toggleSortOrder = () => {
-    setSortOrder(prev => (prev === 'ASC' ? 'DESC' : 'ASC'));
+    setSortOrder((prev) => (prev === "ASC" ? "DESC" : "ASC"));
     setCurrentPage(1);
   };
 
-  // Handle page size change; reset page to 1.
   const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPageSize(parseInt(e.target.value));
     setCurrentPage(1);
   };
 
-  // Handle adding a player to team (integrated from Players.tsx)
+  const handlePreviousPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
+  };
+
   const handleAddToTeam = async (playerId: number) => {
     try {
       setLoading(true);
@@ -103,17 +121,16 @@ const Leaderboard: React.FC = () => {
       setMessage(`Error adding player to team: ${errorMsg}`);
     } finally {
       setLoading(false);
-      setTimeout(() => setMessage(''), 3000);
+      setTimeout(() => setMessage(""), 3000);
     }
   };
 
-  // Framer Motion variants for table rows
   const rowVariants = {
     hidden: { opacity: 0, y: 10 },
     visible: (i: number) => ({
       opacity: 1,
       y: 0,
-      transition: { delay: i * 0.05 }
+      transition: { delay: i * 0.05 },
     }),
   };
 
@@ -122,7 +139,7 @@ const Leaderboard: React.FC = () => {
       <h2 className="text-4xl font-bold text-center mb-6">Leaderboard</h2>
 
       {/* Sorting and Pagination Controls */}
-      <div className="flex flex-wrap justify-center items-center space-x-4 mb-6">
+      <div className="flex flex-wrap justify-center items-center gap-4 mb-6">
         <div>
           <label className="mr-2">Sort by:</label>
           <select
@@ -130,7 +147,7 @@ const Leaderboard: React.FC = () => {
             onChange={handleSortChange}
             className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
-            {sortingOptions.map(option => (
+            {sortingOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -159,7 +176,9 @@ const Leaderboard: React.FC = () => {
         </div>
       </div>
 
-      {message && <div className="mb-4 text-center text-green-600">{message}</div>}
+      {message && (
+        <div className="mb-4 text-center text-green-600">{message}</div>
+      )}
 
       {loading ? (
         <div className="text-center text-xl">Loading leaderboard...</div>
@@ -176,8 +195,13 @@ const Leaderboard: React.FC = () => {
                 <th className="py-3 px-4">Wickets</th>
                 <th className="py-3 px-4">Overs Bowled</th>
                 <th className="py-3 px-4">Runs Conceded</th>
+                {user?.isAdmin && (
+                  <th className="py-3 px-4">Points</th>
+                )}
                 <th className="py-3 px-4">Value</th>
-                <th className="py-3 px-4">Action</th>
+                {!user?.isAdmin && (
+                  <th className="py-3 px-4">Action</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -198,16 +222,25 @@ const Leaderboard: React.FC = () => {
                   <td className="py-3 px-4">{player.wickets}</td>
                   <td className="py-3 px-4">{player.overs_bowled}</td>
                   <td className="py-3 px-4">{player.runs_conceded}</td>
+                  {user?.isAdmin && (
+                    <td className="py-3 px-4">{player.points}</td>
+                  )}
                   <td className="py-3 px-4">{player.value_in_rupees}</td>
-                  <td className="py-3 px-4">
-                    <button
-                      onClick={() => handleAddToTeam(player.id)}
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition disabled:opacity-50"
-                      disabled={player.inTeam || loading}
-                    >
-                      {loading ? 'Processing...' : player.inTeam ? 'Added' : 'Add'}
-                    </button>
-                  </td>
+                  {!user?.isAdmin && (
+                    <td className="py-3 px-4">
+                      <button
+                        onClick={() => handleAddToTeam(player.id)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition disabled:opacity-50"
+                        disabled={player.inTeam || loading}
+                      >
+                        {loading
+                          ? "Processing..."
+                          : player.inTeam
+                          ? "Added"
+                          : "Add"}
+                      </button>
+                    </td>
+                  )}
                 </motion.tr>
               ))}
             </tbody>
@@ -217,8 +250,8 @@ const Leaderboard: React.FC = () => {
 
       {/* Pagination Controls */}
       <div className="flex justify-between items-center mt-6">
-        <button 
-          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+        <button
+          onClick={handlePreviousPage}
           disabled={currentPage === 1}
           className="px-4 py-2 bg-gray-300 text-gray-800 rounded disabled:opacity-50"
         >
@@ -227,10 +260,8 @@ const Leaderboard: React.FC = () => {
         <div>
           Page {currentPage} of {totalPages}
         </div>
-        <button 
-          onClick={() => {
-            if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
-          }}
+        <button
+          onClick={handleNextPage}
           disabled={currentPage === totalPages}
           className="px-4 py-2 bg-gray-300 text-gray-800 rounded disabled:opacity-50"
         >
@@ -239,7 +270,7 @@ const Leaderboard: React.FC = () => {
       </div>
 
       <p className="mt-4 text-center text-sm text-gray-600">
-        Sorted by: {sortBy === 'overall' ? 'Overall Performance' : sortBy} ({sortOrder})
+        Sorted by: {sortBy === "overall" ? "Overall Performance" : sortBy} ({sortOrder})
       </p>
     </div>
   );

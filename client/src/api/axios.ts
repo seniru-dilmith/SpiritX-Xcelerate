@@ -43,6 +43,16 @@ export const deletePlayer = (id: number) => API.delete(`/admin/player/${id}`);
 
 export const createPlayer = (data: any) => API.post("/admin/player", data);
 
+export const getLeaderboardForAdmin = (
+  sortBy: string,
+  order: string,
+  page: number,
+  limit: number
+) =>
+  API.get(
+    `/admin/leaderboard?sortBy=${sortBy}&order=${order}&page=${page}&limit=${limit}`
+  );
+
 export const fetchTournamentSummary = () =>
   API.get("/admin/tournament-summary");
 
@@ -57,7 +67,7 @@ export const removeTeamPlayer = (playerId: number) =>
 
 export const getBudget = () => API.get("/budget");
 
-export const getLeaderboard = (
+export const getLeaderboardForUser = (
   sortBy: string,
   order: string,
   page: number,

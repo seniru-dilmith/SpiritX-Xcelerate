@@ -3,6 +3,7 @@ const router = express.Router();
 const { isAuthenticated } = require("../middleware/general");
 const { isAdmin } = require("../middleware/admin");
 const { getPlayers, getPlayerStatsbyId, updatePlayer, deletePlayer, createPlayer, getTournamentSummary } = require("../controllers/admin");
+const { getLeaderboardForAdmin } = require("../controllers/LeaderboardController");
 
 // Get all players (admin view)
 router.get("/players", isAuthenticated, isAdmin, getPlayers);
@@ -21,5 +22,8 @@ router.post("/player", isAuthenticated, isAdmin, createPlayer);
 
 // Tournament summary endpoint
 router.get("/tournament-summary", isAuthenticated, isAdmin, getTournamentSummary);
+
+// Leaderboard endpoint
+router.get("/leaderboard", isAuthenticated, isAdmin, getLeaderboardForAdmin);
 
 module.exports = router;

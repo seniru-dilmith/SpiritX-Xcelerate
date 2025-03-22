@@ -3,7 +3,8 @@ const express = require('express');
 const router = express.Router();
 const { isAuthenticated } = require('../middleware/general');
 const { isUser } = require('../middleware/user'); 
-const { getAllPlayers, addPlayerToTeam, removePlayerFromTeam, remainingBudget, getLeaderboard, getTeam } = require('../controllers/user');
+const { getAllPlayers, addPlayerToTeam, removePlayerFromTeam, remainingBudget, getTeam } = require('../controllers/user');
+const { getLeaderboardForUser } = require('../controllers/LeaderboardController');
 const { getTransactions } = require('../controllers/transaction');
 
 // Get all players (for regular users)
@@ -19,7 +20,7 @@ router.post('/team/remove', isAuthenticated, isUser, removePlayerFromTeam);
 router.get('/budget', isAuthenticated, isUser, remainingBudget);
 
 // Get the leaderboard
-router.get('/leaderboard', isAuthenticated, isUser, getLeaderboard);
+router.get('/leaderboard', isAuthenticated, isUser, getLeaderboardForUser);
 
 // Get the user's team
 router.get('/team', isAuthenticated, isUser, getTeam);

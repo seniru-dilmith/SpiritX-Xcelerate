@@ -104,49 +104,6 @@ const remainingBudget = async (req, res) => {
   }
 };
 
-const getLeaderboard = async (req, res) => {
-  try {
-    const sortBy = req.query.sortBy || "overall";
-    const order = (req.query.order || "ASC").toUpperCase();
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
-    const offset = (page - 1) * limit;
-
-    let orderClause;
-    if (sortBy === "overall") {
-      orderClause = [["points", order]];
-    } else if (
-      [
-        "name",
-        "total_runs",
-        "balls_faced",
-        "innings_played",
-        "wickets",
-        "overs_bowled",
-        "runs_conceded",
-        "value_in_rupees",
-      ].includes(sortBy)
-    ) {
-      orderClause = [[sortBy, order]];
-    } else {
-      orderClause = [["points", order]];
-    }
-
-    const result = await Player.findAndCountAll({
-      order: orderClause,
-      limit,
-      offset,
-    });
-
-    // Return both the data rows and the total count
-    res.json({ rows: result.rows, count: result.count });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error fetching leaderboard", error: err.message });
-  }
-};
-
 const getTeam = async (req, res) => {
   try {
     const team = await Team.findAll({
@@ -168,6 +125,5 @@ module.exports = {
   addPlayerToTeam,
   removePlayerFromTeam,
   remainingBudget,
-  getLeaderboard,
   getTeam,
 };
