@@ -55,14 +55,17 @@ export const deletePlayer = (id: number) => API.delete(`/admin/player/${id}`);
 export const createPlayer = (data: any) => API.post("/admin/player", data);
 
 export const getLeaderboardForAdmin = (
+  searchTerm: string,
   sortBy: string,
   order: string,
   page: number,
   limit: number
 ) =>
   API.get(
-    `/admin/leaderboard?sortBy=${sortBy}&order=${order}&page=${page}&limit=${limit}`
-  );
+    `/admin/leaderboard?searchTerm=${encodeURIComponent(
+      searchTerm
+    )}&sortBy=${sortBy}&order=${order}&page=${page}&limit=${limit}`
+);
 
 export const fetchTournamentSummary = () =>
   API.get("/admin/tournament-summary");
@@ -79,14 +82,17 @@ export const removeTeamPlayer = (playerId: number) =>
 export const getBudget = () => API.get("/budget");
 
 export const getLeaderboardForUser = (
+  searchTerm: string,
   sortBy: string,
   order: string,
   page: number,
   limit: number
 ) =>
   API.get(
-    `/leaderboard?sortBy=${sortBy}&order=${order}&page=${page}&limit=${limit}`
-  );
+    `/leaderboard?searchTerm=${encodeURIComponent(
+      searchTerm
+    )}&sortBy=${sortBy}&order=${order}&page=${page}&limit=${limit}`
+);
 
 export const fetchTeam = () => API.get("/team");
 

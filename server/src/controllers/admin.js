@@ -1,5 +1,16 @@
 const { Op } = require("sequelize");
 const { Player } = require("../models");
+const socketIO = require("../socket");
+
+// Helper function for emitting socket events safely
+const emitSocketEvent = (event, data) => {
+  try {
+    socketIO.getIO().emit(event, data);
+  } catch (error) {
+    console.log("Socket emission error:", error);
+    // Socket errors shouldn't affect the API response
+  }
+};
 
 const getPlayers = async (req, res) => {
   try {
@@ -10,7 +21,6 @@ const getPlayers = async (req, res) => {
     const sortBy = req.query.sortBy || "name";
     const order = req.query.order || "ASC";
 
-    // Build where clause if searchTerm is provided
     let whereClause = {};
     if (searchTerm) {
       whereClause = {
@@ -18,7 +28,6 @@ const getPlayers = async (req, res) => {
       };
     }
 
-    // Use findAndCountAll to support pagination and sorting.
     const result = await Player.findAndCountAll({
       where: whereClause,
       limit,
@@ -26,7 +35,6 @@ const getPlayers = async (req, res) => {
       order: [[sortBy, order]],
     });
 
-    // Transform the rows to plain objects and round off points.
     const players = result.rows.map((player) => {
       const p = player.toJSON();
       if (typeof p.points === "number") {
@@ -35,9 +43,9 @@ const getPlayers = async (req, res) => {
       return p;
     });
 
-    // Return both rows (players) and count.
     res.json({ rows: players, count: result.count });
   } catch (err) {
+    console.log("Error in getPlayers:", err);
     res
       .status(500)
       .json({ message: "Error fetching players", error: err.message });
@@ -52,6 +60,7 @@ const getPlayerStatsbyId = async (req, res) => {
     }
     res.json(player);
   } catch (err) {
+    console.log("Error in getPlayerStatsbyId:", err);
     res
       .status(500)
       .json({ message: "Error fetching player stats", error: err.message });
@@ -64,9 +73,15 @@ const updatePlayer = async (req, res) => {
     if (!player) {
       return res.status(404).json({ message: "Player not found" });
     }
-    await player.update(req.body);
-    res.json({ message: "Player updated", player });
+    
+    const updatedPlayer = await player.update(req.body);
+
+    // Emit socket event
+    emitSocketEvent("playersUpdated");
+
+    res.json({ message: "Player updated", player: updatedPlayer });
   } catch (err) {
+    console.log("Error in updatePlayer:", err);
     res
       .status(500)
       .json({ message: "Error updating player", error: err.message });
@@ -80,8 +95,13 @@ const deletePlayer = async (req, res) => {
       return res.status(404).json({ message: "Player not found" });
     }
     await player.destroy();
-    res.json({ message: "Player deleted" });
+
+    // Emit socket event
+    emitSocketEvent("playersUpdated");
+
+    res.json({ message: "Player deleted", id: req.params.id });
   } catch (err) {
+    console.log("Error in deletePlayer:", err);
     res
       .status(500)
       .json({ message: "Error deleting player", error: err.message });
@@ -93,7 +113,6 @@ const createPlayer = async (req, res) => {
     const allowedCategories = ["Batsman", "Bowler", "All-Rounder"];
     const { category } = req.body;
 
-    // Validate category
     if (!allowedCategories.includes(category)) {
       return res.status(400).json({
         message:
@@ -102,8 +121,13 @@ const createPlayer = async (req, res) => {
     }
 
     const newPlayer = await Player.create(req.body);
+
+    // Emit socket event
+    emitSocketEvent("playersUpdated");
+
     res.json({ message: "Player created", player: newPlayer });
   } catch (err) {
+    console.log("Error in createPlayer:", err);
     res
       .status(500)
       .json({ message: "Error creating player", error: err.message });
@@ -136,6 +160,7 @@ const getTournamentSummary = async (req, res) => {
       highestWicketTaker,
     });
   } catch (err) {
+    console.log("Error in getTournamentSummary:", err);
     res.status(500).json({
       message: "Error fetching tournament summary",
       error: err.message,

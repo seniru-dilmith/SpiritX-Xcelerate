@@ -14,7 +14,7 @@ const AdminPanel: React.FC = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("ASC");
@@ -30,9 +30,8 @@ const AdminPanel: React.FC = () => {
   const fetchPlayersData = async () => {
     setLoading(true);
     try {
-      // Pass search, pagination and sorting parameters to the API.
+      // Assuming fetchAdminPlayers now returns { rows, count } 
       const res = await fetchAdminPlayers(searchTerm, currentPage, pageSize, sortBy, sortOrder);
-      // Use res.data.rows as the players array.
       setPlayers(res.data.rows);
       setTotalCount(res.data.count);
       setError(null);
@@ -89,31 +88,13 @@ const AdminPanel: React.FC = () => {
     setCurrentPage(1);
   };
 
+  const totalPages = Math.ceil(totalCount / pageSize);
+
   return (
     <div className="max-w-4xl mx-auto mt-10 p-4">
       <h2 className="text-2xl font-bold mb-4">Admin Panel - Players</h2>
       
-      <div className="flex flex-col sm:flex-row sm:justify-between mb-4">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-          placeholder="Search by name..."
-          className="p-2 border rounded w-full sm:w-64 mb-2 sm:mb-0"
-        />
-        <div className="flex items-center gap-4">
-          <label className="text-sm">Rows per page:</label>
-          <select
-            value={pageSize}
-            onChange={(e) => { setPageSize(parseInt(e.target.value)); setCurrentPage(1); }}
-            className="p-2 border rounded"
-          >
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-        </div>
-      </div>
+      {/* (Search, sort and pagination controls can be added here if needed) */}
       
       <button
         onClick={() => setIsAddModalOpen(true)}
@@ -142,14 +123,26 @@ const AdminPanel: React.FC = () => {
               <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("total_runs")}>
                 Total Runs {sortBy === "total_runs" && (sortOrder === "ASC" ? "↑" : "↓")}
               </th>
+              <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("balls_faced")}>
+                Balls Faced {sortBy === "balls_faced" && (sortOrder === "ASC" ? "↑" : "↓")}
+              </th>
+              <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("innings_played")}>
+                Innings Played {sortBy === "innings_played" && (sortOrder === "ASC" ? "↑" : "↓")}
+              </th>
               <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("wickets")}>
                 Wickets {sortBy === "wickets" && (sortOrder === "ASC" ? "↑" : "↓")}
+              </th>
+              <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("overs_bowled")}>
+                Overs Bowled {sortBy === "overs_bowled" && (sortOrder === "ASC" ? "↑" : "↓")}
+              </th>
+              <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("runs_conceded")}>
+                Runs Conceded {sortBy === "runs_conceded" && (sortOrder === "ASC" ? "↑" : "↓")}
               </th>
               <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("points")}>
                 Points {sortBy === "points" && (sortOrder === "ASC" ? "↑" : "↓")}
               </th>
               <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("value_in_rupees")}>
-                Value {sortBy === "value_in_rupees" && (sortOrder === "ASC" ? "↑" : "↓")}
+                Value (Rs.) {sortBy === "value_in_rupees" && (sortOrder === "ASC" ? "↑" : "↓")}
               </th>
               <th className="py-2 px-4">Actions</th>
             </tr>
@@ -161,11 +154,14 @@ const AdminPanel: React.FC = () => {
                 <td className="py-2 px-4">{player.university}</td>
                 <td className="py-2 px-4">{player.category}</td>
                 <td className="py-2 px-4">{player.total_runs}</td>
+                <td className="py-2 px-4">{player.balls_faced}</td>
+                <td className="py-2 px-4">{player.innings_played}</td>
                 <td className="py-2 px-4">{player.wickets}</td>
+                <td className="py-2 px-4">{player.overs_bowled}</td>
+                <td className="py-2 px-4">{player.runs_conceded}</td>
                 <td className="py-2 px-4">{player.points}</td>
                 <td className="py-2 px-4">{player.value_in_rupees}</td>
                 <td className="py-2 px-4 space-x-2">
-                  <div className="flex space-x-2">
                   <button
                     onClick={() => {
                       setSelectedPlayer(player);
@@ -184,7 +180,6 @@ const AdminPanel: React.FC = () => {
                   >
                     Delete
                   </button>
-                    </div>
                 </td>
               </tr>
             ))}
@@ -202,7 +197,7 @@ const AdminPanel: React.FC = () => {
           Previous
         </button>
         <div>
-          Page {currentPage} of {Math.ceil(totalCount / pageSize)}
+          Page {currentPage} of {totalPages}
         </div>
         <button
           onClick={() => setCurrentPage((prev) => prev + 1)}

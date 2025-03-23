@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const http = require("http");
+const socketIO = require("./socket");
 
 dotenv.config();
 
@@ -12,7 +14,12 @@ const userRoutes = require("./routes/user");
 const chatbotRoutes = require("./routes/chatbot");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const server = http.createServer(app);
+
+// Initialize Socket.IO
+const io = socketIO.init(server);
+
+const PORT = process.env.PORT;
 
 // Middleware
 app.use(
@@ -26,7 +33,7 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api", userRoutes); // For players, team, budget, leaderboard
+app.use("/api", userRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 
 // Test route
@@ -51,8 +58,7 @@ const startServer = async () => {
       console.log("✅ Sample data populated.");
     }
 
-    console.log(`🚀 Starting server on port ${PORT}...`);
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
     });
   } catch (error) {
