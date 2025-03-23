@@ -182,7 +182,3 @@ This project implements RBAC with two roles:
   
 - **Error Handling:**  
   Both backend and frontend include error handling. Check your console logs if something isn’t working as expected.
-
----
-
-This README provides all the details needed to run the project, prepare the database, populate initial data (if available), and explains the features and RBAC of the system. If you have any additional customizations or requirements, adjust the instructions accordingly.
