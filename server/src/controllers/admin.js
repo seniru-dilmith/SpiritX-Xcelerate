@@ -1,9 +1,42 @@
-const { Player, User } = require('../models');
+const { Op } = require("sequelize");
+const { Player } = require("../models");
 
 const getPlayers = async (req, res) => {
   try {
-    const players = await Player.findAll();
-    res.json(players);
+    const searchTerm = req.query.searchTerm || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+    const sortBy = req.query.sortBy || "name";
+    const order = req.query.order || "ASC";
+
+    // Build where clause if searchTerm is provided
+    let whereClause = {};
+    if (searchTerm) {
+      whereClause = {
+        name: { [Op.like]: `%${searchTerm}%` },
+      };
+    }
+
+    // Use findAndCountAll to support pagination and sorting.
+    const result = await Player.findAndCountAll({
+      where: whereClause,
+      limit,
+      offset,
+      order: [[sortBy, order]],
+    });
+
+    // Transform the rows to plain objects and round off points.
+    const players = result.rows.map((player) => {
+      const p = player.toJSON();
+      if (typeof p.points === "number") {
+        p.points = p.points.toFixed(2);
+      }
+      return p;
+    });
+
+    // Return both rows (players) and count.
+    res.json({ rows: players, count: result.count });
   } catch (err) {
     res
       .status(500)
@@ -57,6 +90,17 @@ const deletePlayer = async (req, res) => {
 
 const createPlayer = async (req, res) => {
   try {
+    const allowedCategories = ["Batsman", "Bowler", "All-Rounder"];
+    const { category } = req.body;
+
+    // Validate category
+    if (!allowedCategories.includes(category)) {
+      return res.status(400).json({
+        message:
+          "Invalid category. Allowed categories are: Batsman, Bowler, All-Rounder.",
+      });
+    }
+
     const newPlayer = await Player.create(req.body);
     res.json({ message: "Player created", player: newPlayer });
   } catch (err) {
@@ -92,13 +136,18 @@ const getTournamentSummary = async (req, res) => {
       highestWicketTaker,
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        message: "Error fetching tournament summary",
-        error: err.message,
-      });
+    res.status(500).json({
+      message: "Error fetching tournament summary",
+      error: err.message,
+    });
   }
 };
 
-module.exports = { getPlayers, getPlayerStatsbyId, updatePlayer, deletePlayer, createPlayer, getTournamentSummary };
+module.exports = {
+  getPlayers,
+  getPlayerStatsbyId,
+  updatePlayer,
+  deletePlayer,
+  createPlayer,
+  getTournamentSummary,
+};

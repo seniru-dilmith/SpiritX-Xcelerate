@@ -31,7 +31,18 @@ export const refreshToken = () => API.post("/auth/refresh");
 export const logout = () => API.post("/auth/logout");
 
 // ========== Admin APIs ==========
-export const fetchAdminPlayers = () => API.get("/admin/players");
+export const fetchAdminPlayers = (
+  searchTerm: string,
+  page: number,
+  limit: number,
+  sortBy: string,
+  order: string
+) =>
+  API.get(
+    `/admin/players?searchTerm=${encodeURIComponent(
+      searchTerm
+    )}&page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}`
+  );
 
 export const fetchPlayerStats = (id: number) =>
   API.get(`/admin/player-stats/${id}`);
@@ -79,7 +90,7 @@ export const getLeaderboardForUser = (
 
 export const fetchTeam = () => API.get("/team");
 
-export const getTransactions = () => API.get('/transactions');
+export const getTransactions = () => API.get("/transactions");
 
 // ========== Chatbot API ==========
 export const sendChatbotMessage = (message: string) =>
