@@ -3,7 +3,7 @@ const router = express.Router();
 const { isAuthenticated } = require("../middleware/general");
 const { isAdmin } = require("../middleware/admin");
 const { getPlayers, getPlayerStatsbyId, updatePlayer, deletePlayer, createPlayer, getTournamentSummary } = require("../controllers/admin");
-const { getLeaderboardForAdmin } = require("../controllers/LeaderboardController");
+const { getLeaderboardForAdmin } = require("../controllers/Leaderboard");
 
 // Get all players (admin view)
 router.get("/players", isAuthenticated, isAdmin, getPlayers);

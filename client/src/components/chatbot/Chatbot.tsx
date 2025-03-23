@@ -2,11 +2,14 @@ import React, { useState, useRef, useEffect } from "react";
 import { sendChatbotMessage } from "../../api/axios";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useAuth } from "../../context/AuthContext";
+import TypingIndicator from "./TypingIndicator";
 
 const Chatbot: React.FC = () => {
   const [message, setMessage] = useState("");
   const [chat, setChat] = useState<{ sender: string; text: string }[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const [isUserAtBottom, setIsUserAtBottom] = useState(true);
   const { user } = useAuth();
@@ -16,6 +19,7 @@ const Chatbot: React.FC = () => {
 
     const userMsg = { sender: user?.name || "You", text: message };
     setChat((prev) => [...prev, userMsg]);
+    setIsTyping(true);
 
     try {
       const res = await sendChatbotMessage(message);
@@ -27,6 +31,7 @@ const Chatbot: React.FC = () => {
     }
 
     setMessage("");
+    setIsTyping(false);
   };
 
   const scrollToBottom = () => {
@@ -43,7 +48,7 @@ const Chatbot: React.FC = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [chat]);
+  }, [chat, isUserAtBottom]);
 
   const handleScroll = () => {
     const container = chatContainerRef.current;
@@ -73,18 +78,34 @@ const Chatbot: React.FC = () => {
               className={`flex ${isUserMessage ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`px-4 py-2 max-w-[75%] rounded-lg text-sm ${
+                className={`px-4 py-2 max-w-[85%] rounded-lg text-sm ${
                   isUserMessage
                     ? "bg-blue-500 text-white rounded-br-none"
                     : "bg-gray-200 text-gray-800 rounded-bl-none"
                 }`}
               >
                 <span className="block font-medium mb-1">{msg.sender}</span>
-                <ReactMarkdown>{msg.text}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {msg.text}
+                </ReactMarkdown>
               </div>
             </motion.div>
           );
         })}
+        {/* Render typing indicator if isTyping is true */}
+        {isTyping && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="flex justify-start"
+          >
+            <div className="px-4 py-2 max-w-[85%] rounded-lg text-sm bg-gray-200 text-gray-800 rounded-bl-none">
+              <span className="block font-medium mb-1">Spiriter</span>
+              <TypingIndicator />
+            </div>
+          </motion.div>
+        )}
       </div>
 
       <div className="flex border-t p-4 gap-2">

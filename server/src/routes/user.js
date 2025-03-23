@@ -4,7 +4,7 @@ const router = express.Router();
 const { isAuthenticated } = require('../middleware/general');
 const { isUser } = require('../middleware/user'); 
 const { getAllPlayers, addPlayerToTeam, removePlayerFromTeam, remainingBudget, getTeam } = require('../controllers/user');
-const { getLeaderboardForUser } = require('../controllers/LeaderboardController');
+const { getLeaderboardForUser } = require('../controllers/Leaderboard');
 const { getTransactions } = require('../controllers/transaction');
 
 // Get all players (for regular users)
