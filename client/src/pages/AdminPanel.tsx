@@ -1,6 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { fetchAdminPlayers, createPlayer, updatePlayer, deletePlayer } from "../api/axios";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  fetchAdminPlayers,
+  createPlayer,
+  updatePlayer,
+  deletePlayer,
+} from "../api/axios";
 import { motion, AnimatePresence } from "framer-motion";
+import AdminPanelControls from "../components/adminPanel/AdminPanelControls";
 import PlayerModal, { Player } from "../components/adminPanel/PlayerModal";
 import DeletePlayerModal from "../components/adminPanel/DeletePlayerModal";
 
@@ -11,10 +17,12 @@ const modalVariants = {
 };
 
 const AdminPanel: React.FC = () => {
+  // Data state
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Search, sort, and pagination states
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("ASC");
@@ -22,30 +30,38 @@ const AdminPanel: React.FC = () => {
   const [pageSize, setPageSize] = useState(20);
   const [totalCount, setTotalCount] = useState(0);
 
+  // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
-  const fetchPlayersData = async () => {
+  // Fetch players data with search, sorting, and pagination
+  const fetchPlayersData = useCallback(async () => {
     setLoading(true);
     try {
-      // Assuming fetchAdminPlayers now returns { rows, count } 
-      const res = await fetchAdminPlayers(searchTerm, currentPage, pageSize, sortBy, sortOrder);
+      const res = await fetchAdminPlayers(
+        searchTerm,
+        currentPage,
+        pageSize,
+        sortBy,
+        sortOrder
+      );
       setPlayers(res.data.rows);
       setTotalCount(res.data.count);
       setError(null);
     } catch (err: any) {
-      setError(err.message || "Error fetching players");
+      setError(err.response?.data?.message || err.message || "Error fetching players");
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, currentPage, pageSize, sortBy, sortOrder]);
 
   useEffect(() => {
     fetchPlayersData();
-  }, [searchTerm, currentPage, pageSize, sortBy, sortOrder]);
+  }, [fetchPlayersData]);
 
+  // Handlers for CRUD operations
   const handleAddPlayer = async (playerData: Partial<Player>) => {
     try {
       await createPlayer(playerData);
@@ -78,6 +94,7 @@ const AdminPanel: React.FC = () => {
     }
   };
 
+  // Sorting: toggle sort order if same column is clicked; otherwise change sort column.
   const toggleSort = (column: string) => {
     if (sortBy === column) {
       setSortOrder((prev) => (prev === "ASC" ? "DESC" : "ASC"));
@@ -91,11 +108,26 @@ const AdminPanel: React.FC = () => {
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-4">
-      <h2 className="text-2xl font-bold mb-4">Admin Panel - Players</h2>
-      
-      {/* (Search, sort and pagination controls can be added here if needed) */}
-      
+    <div className="container mx-auto p-4">
+      <h2 className="text-3xl font-bold text-center mb-6">Admin Panel - Players</h2>
+
+      <AdminPanelControls
+        searchTerm={searchTerm}
+        onSearchChange={(value) => {
+          setSearchTerm(value);
+          setCurrentPage(1);
+        }}
+        pageSize={pageSize}
+        onPageSizeChange={(value) => {
+          setPageSize(value);
+          setCurrentPage(1);
+        }}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPreviousPage={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+        onNextPage={() => setCurrentPage((prev) => prev + 1)}
+      />
+
       <button
         onClick={() => setIsAddModalOpen(true)}
         className="mb-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
@@ -104,87 +136,89 @@ const AdminPanel: React.FC = () => {
       </button>
 
       {loading ? (
-        <div>Loading...</div>
+        <div className="text-center">Loading...</div>
       ) : error ? (
-        <div className="text-red-600">{error}</div>
+        <div className="text-center text-red-600">{error}</div>
       ) : (
-        <table className="min-w-full bg-white border rounded-lg shadow">
-          <thead className="bg-gray-800 text-white">
-            <tr>
-              <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("name")}>
-                Name {sortBy === "name" && (sortOrder === "ASC" ? "↑" : "↓")}
-              </th>
-              <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("university")}>
-                University {sortBy === "university" && (sortOrder === "ASC" ? "↑" : "↓")}
-              </th>
-              <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("category")}>
-                Category {sortBy === "category" && (sortOrder === "ASC" ? "↑" : "↓")}
-              </th>
-              <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("total_runs")}>
-                Total Runs {sortBy === "total_runs" && (sortOrder === "ASC" ? "↑" : "↓")}
-              </th>
-              <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("balls_faced")}>
-                Balls Faced {sortBy === "balls_faced" && (sortOrder === "ASC" ? "↑" : "↓")}
-              </th>
-              <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("innings_played")}>
-                Innings Played {sortBy === "innings_played" && (sortOrder === "ASC" ? "↑" : "↓")}
-              </th>
-              <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("wickets")}>
-                Wickets {sortBy === "wickets" && (sortOrder === "ASC" ? "↑" : "↓")}
-              </th>
-              <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("overs_bowled")}>
-                Overs Bowled {sortBy === "overs_bowled" && (sortOrder === "ASC" ? "↑" : "↓")}
-              </th>
-              <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("runs_conceded")}>
-                Runs Conceded {sortBy === "runs_conceded" && (sortOrder === "ASC" ? "↑" : "↓")}
-              </th>
-              <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("points")}>
-                Points {sortBy === "points" && (sortOrder === "ASC" ? "↑" : "↓")}
-              </th>
-              <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("value_in_rupees")}>
-                Value (Rs.) {sortBy === "value_in_rupees" && (sortOrder === "ASC" ? "↑" : "↓")}
-              </th>
-              <th className="py-2 px-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {players.map((player) => (
-              <tr key={player.id} className="border-t">
-                <td className="py-2 px-4">{player.name}</td>
-                <td className="py-2 px-4">{player.university}</td>
-                <td className="py-2 px-4">{player.category}</td>
-                <td className="py-2 px-4">{player.total_runs}</td>
-                <td className="py-2 px-4">{player.balls_faced}</td>
-                <td className="py-2 px-4">{player.innings_played}</td>
-                <td className="py-2 px-4">{player.wickets}</td>
-                <td className="py-2 px-4">{player.overs_bowled}</td>
-                <td className="py-2 px-4">{player.runs_conceded}</td>
-                <td className="py-2 px-4">{player.points}</td>
-                <td className="py-2 px-4">{player.value_in_rupees}</td>
-                <td className="py-2 px-4 space-x-2">
-                  <button
-                    onClick={() => {
-                      setSelectedPlayer(player);
-                      setIsEditModalOpen(true);
-                    }}
-                    className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSelectedPlayer(player);
-                      setIsDeleteModalOpen(true);
-                    }}
-                    className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition"
-                  >
-                    Delete
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border rounded-lg shadow">
+            <thead className="bg-gray-800 text-white">
+              <tr>
+                <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("name")}>
+                  Name {sortBy === "name" && (sortOrder === "ASC" ? "↑" : "↓")}
+                </th>
+                <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("university")}>
+                  University {sortBy === "university" && (sortOrder === "ASC" ? "↑" : "↓")}
+                </th>
+                <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("category")}>
+                  Category {sortBy === "category" && (sortOrder === "ASC" ? "↑" : "↓")}
+                </th>
+                <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("total_runs")}>
+                  Total Runs {sortBy === "total_runs" && (sortOrder === "ASC" ? "↑" : "↓")}
+                </th>
+                <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("balls_faced")}>
+                  Balls Faced {sortBy === "balls_faced" && (sortOrder === "ASC" ? "↑" : "↓")}
+                </th>
+                <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("innings_played")}>
+                  Innings Played {sortBy === "innings_played" && (sortOrder === "ASC" ? "↑" : "↓")}
+                </th>
+                <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("wickets")}>
+                  Wickets {sortBy === "wickets" && (sortOrder === "ASC" ? "↑" : "↓")}
+                </th>
+                <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("overs_bowled")}>
+                  Overs Bowled {sortBy === "overs_bowled" && (sortOrder === "ASC" ? "↑" : "↓")}
+                </th>
+                <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("runs_conceded")}>
+                  Runs Conceded {sortBy === "runs_conceded" && (sortOrder === "ASC" ? "↑" : "↓")}
+                </th>
+                <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("points")}>
+                  Points {sortBy === "points" && (sortOrder === "ASC" ? "↑" : "↓")}
+                </th>
+                <th className="py-2 px-4 cursor-pointer" onClick={() => toggleSort("value_in_rupees")}>
+                  Value (Rs.) {sortBy === "value_in_rupees" && (sortOrder === "ASC" ? "↑" : "↓")}
+                </th>
+                <th className="py-2 px-4">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {players.map((player) => (
+                <tr key={player.id} className="border-t">
+                  <td className="py-2 px-4">{player.name}</td>
+                  <td className="py-2 px-4">{player.university}</td>
+                  <td className="py-2 px-4">{player.category}</td>
+                  <td className="py-2 px-4">{player.total_runs}</td>
+                  <td className="py-2 px-4">{player.balls_faced}</td>
+                  <td className="py-2 px-4">{player.innings_played}</td>
+                  <td className="py-2 px-4">{player.wickets}</td>
+                  <td className="py-2 px-4">{player.overs_bowled}</td>
+                  <td className="py-2 px-4">{player.runs_conceded}</td>
+                  <td className="py-2 px-4">{player.points}</td>
+                  <td className="py-2 px-4">{player.value_in_rupees}</td>
+                  <td className="flex py-2 px-4 space-x-2">
+                    <button
+                      onClick={() => {
+                        setSelectedPlayer(player);
+                        setIsEditModalOpen(true);
+                      }}
+                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedPlayer(player);
+                        setIsDeleteModalOpen(true);
+                      }}
+                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {/* Pagination Controls */}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { 
   getLeaderboardForAdmin, 
   getLeaderboardForUser, 
@@ -10,6 +10,7 @@ import { useAuth } from "../context/AuthContext";
 import LeaderboardTable, { Player } from "../components/leaderboard/LeaderboardTable";
 import LeaderboardControls from "../components/leaderboard/LeaderboardControls";
 import socket from "../sockets";
+import { useLocation } from "react-router-dom";
 
 const Leaderboard: React.FC = () => {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -22,6 +23,50 @@ const Leaderboard: React.FC = () => {
   const [pageSize, setPageSize] = useState(20);
   const { loading, setLoading } = useLoading();
   const { user, loading: authLoading } = useAuth();
+  const location = useLocation();
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  // Comprehensive scroll restoration
+  useEffect(() => {
+    const restoreScrollPosition = () => {
+      const savedScrollKey = `leaderboard-scroll-${location.pathname}`;
+      const savedScrollPosition = sessionStorage.getItem(savedScrollKey);
+      
+      if (savedScrollPosition && tableContainerRef.current) {
+        const scrollPosition = parseInt(savedScrollPosition, 10);
+        window.scrollTo(0, scrollPosition);
+      }
+    };
+
+    // Restore scroll position after a short delay to ensure content is rendered
+    const timeoutId = setTimeout(restoreScrollPosition, 100);
+
+    // Save scroll position before unload
+    const saveScrollPosition = () => {
+      const savedScrollKey = `leaderboard-scroll-${location.pathname}`;
+      sessionStorage.setItem(savedScrollKey, window.scrollY.toString());
+    };
+
+    // Add event listeners
+    window.addEventListener('beforeunload', saveScrollPosition);
+
+    // Cleanup
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('beforeunload', saveScrollPosition);
+    };
+  }, [location.pathname]);
+
+  // Scroll position tracking
+  useEffect(() => {
+    const handleScroll = () => {
+      const savedScrollKey = `leaderboard-scroll-${location.pathname}`;
+      sessionStorage.setItem(savedScrollKey, window.scrollY.toString());
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [location.pathname]);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -105,7 +150,7 @@ const Leaderboard: React.FC = () => {
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
-    <div className="max-w-6xl mx-auto mt-10 p-4">
+    <div ref={tableContainerRef} className="max-w-6xl mx-auto mt-10 p-4">
       <h2 className="text-4xl font-bold text-center mb-6">Leaderboard</h2>
       
       <LeaderboardControls
@@ -124,13 +169,12 @@ const Leaderboard: React.FC = () => {
         <div className="text-center text-xl">Loading leaderboard...</div>
       ) : (
         <LeaderboardTable
-          players={players}
-          isAdmin={user?.isAdmin || false}
-          onAddToTeam={handleAddToTeam}
-          onSortChange={handleSortChange}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-        />
+            players={players}
+            isAdmin={user?.isAdmin || false}
+            onAddToTeam={handleAddToTeam}
+            onSortChange={handleSortChange}
+            sortBy={sortBy}
+            sortOrder={sortOrder} currentPage={0} pageSize={0} totalPlayers={0}        />
       )}
       
       <p className="mt-4 text-center text-sm text-gray-600">
