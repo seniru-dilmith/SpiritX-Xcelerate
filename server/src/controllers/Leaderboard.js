@@ -1,12 +1,22 @@
-const { Player } = require('../models');
+const { Op } = require("sequelize");
+const { Player } = require("../models");
 
 const getLeaderboardForUser = async (req, res) => {
   try {
+    const searchTerm = req.query.searchTerm || "";
     const sortBy = req.query.sortBy || "overall";
     const order = (req.query.order || "ASC").toUpperCase();
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const offset = (page - 1) * limit;
+
+    // Build where clause for search filtering
+    let whereClause = {};
+    if (searchTerm) {
+      whereClause = {
+        name: { [Op.like]: `%${searchTerm}%` },
+      };
+    }
 
     let orderClause;
     if (sortBy === "overall") {
@@ -29,13 +39,14 @@ const getLeaderboardForUser = async (req, res) => {
     }
 
     const result = await Player.findAndCountAll({
+      where: whereClause,
       order: orderClause,
       limit,
       offset,
     });
 
     // Remove the points property for regular users
-    const rows = result.rows.map(player => {
+    const rows = result.rows.map((player) => {
       const p = player.toJSON();
       delete p.points;
       return p;
@@ -43,20 +54,28 @@ const getLeaderboardForUser = async (req, res) => {
 
     res.json({ rows, count: result.count });
   } catch (err) {
-    res.status(500).json({ 
-      message: "Error fetching leaderboard", 
-      error: err.message 
+    res.status(500).json({
+      message: "Error fetching leaderboard",
+      error: err.message,
     });
   }
 };
 
 const getLeaderboardForAdmin = async (req, res) => {
   try {
+    const searchTerm = req.query.searchTerm || "";
     const sortBy = req.query.sortBy || "overall";
     const order = (req.query.order || "ASC").toUpperCase();
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const offset = (page - 1) * limit;
+
+    let whereClause = {};
+    if (searchTerm) {
+      whereClause = {
+        name: { [Op.like]: `%${searchTerm}%` },
+      };
+    }
 
     let orderClause;
     if (sortBy === "overall") {
@@ -80,6 +99,7 @@ const getLeaderboardForAdmin = async (req, res) => {
     }
 
     const result = await Player.findAndCountAll({
+      where: whereClause,
       order: orderClause,
       limit,
       offset,
@@ -88,9 +108,9 @@ const getLeaderboardForAdmin = async (req, res) => {
     // For admins, we include the points in the returned data.
     res.json({ rows: result.rows, count: result.count });
   } catch (err) {
-    res.status(500).json({ 
-      message: "Error fetching leaderboard", 
-      error: err.message 
+    res.status(500).json({
+      message: "Error fetching leaderboard",
+      error: err.message,
     });
   }
 };

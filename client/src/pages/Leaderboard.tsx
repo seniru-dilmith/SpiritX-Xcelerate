@@ -27,9 +27,7 @@ const Leaderboard: React.FC = () => {
     if (!user) return;
     try {
       setLoading(true);
-      const leaderboardApi = user.isAdmin
-        ? getLeaderboardForAdmin
-        : getLeaderboardForUser;
+      const leaderboardApi = user.isAdmin ? getLeaderboardForAdmin : getLeaderboardForUser;
       const teamPromise = user.isAdmin ? Promise.resolve({ data: [] }) : fetchTeam();
       const [res, teamRes] = await Promise.all([
         leaderboardApi(searchTerm, sortBy, sortOrder, currentPage, pageSize),
@@ -48,7 +46,6 @@ const Leaderboard: React.FC = () => {
 
   useEffect(() => {
     if (!authLoading && user) {
-      // Set up socket to listen for real-time updates
       socket.on("playersUpdated", () => {
         fetchData();
       });
@@ -59,7 +56,6 @@ const Leaderboard: React.FC = () => {
     };
   }, [fetchData, authLoading, user]);
 
-  // Handlers for controls (search, sort, pagination)
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
     setCurrentPage(1);
@@ -115,9 +111,6 @@ const Leaderboard: React.FC = () => {
       <LeaderboardControls
         searchTerm={searchTerm}
         onSearchChange={handleSearchChange}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-        onSortChange={handleSortChange}
         pageSize={pageSize}
         onPageSizeChange={handlePageSizeChange}
         currentPage={currentPage}
@@ -130,7 +123,14 @@ const Leaderboard: React.FC = () => {
       {loading ? (
         <div className="text-center text-xl">Loading leaderboard...</div>
       ) : (
-        <LeaderboardTable players={players} isAdmin={user?.isAdmin || false} onAddToTeam={handleAddToTeam} />
+        <LeaderboardTable
+          players={players}
+          isAdmin={user?.isAdmin || false}
+          onAddToTeam={handleAddToTeam}
+          onSortChange={handleSortChange}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+        />
       )}
       
       <p className="mt-4 text-center text-sm text-gray-600">

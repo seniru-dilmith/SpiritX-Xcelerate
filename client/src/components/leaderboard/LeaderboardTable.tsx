@@ -5,6 +5,7 @@ export interface Player {
   id: number;
   name: string;
   university: string;
+  category: string;
   total_runs: number;
   balls_faced: number;
   innings_played: number;
@@ -20,6 +21,9 @@ interface LeaderboardTableProps {
   players: Player[];
   isAdmin: boolean;
   onAddToTeam?: (id: number) => void;
+  onSortChange: (column: string) => void;
+  sortBy: string;
+  sortOrder: "ASC" | "DESC";
 }
 
 const rowVariants = {
@@ -35,22 +39,35 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
   players,
   isAdmin,
   onAddToTeam,
+  onSortChange,
+  sortBy,
+  sortOrder,
 }) => {
+  const renderHeader = (label: string, column: string) => (
+    <th
+      className="py-3 px-4 cursor-pointer select-none"
+      onClick={() => onSortChange(column)}
+    >
+      {label} {sortBy === column && (sortOrder === "ASC" ? "↑" : "↓")}
+    </th>
+  );
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full bg-white border rounded-lg shadow-lg">
         <thead className="bg-blue-600 text-white">
           <tr>
-            <th className="py-3 px-4">Name</th>
-            <th className="py-3 px-4">University</th>
-            <th className="py-3 px-4">Total Runs</th>
-            <th className="py-3 px-4">Balls Faced</th>
-            <th className="py-3 px-4">Innings Played</th>
-            <th className="py-3 px-4">Wickets</th>
-            <th className="py-3 px-4">Overs Bowled</th>
-            <th className="py-3 px-4">Runs Conceded</th>
-            {isAdmin && <th className="py-3 px-4">Points</th>}
-            <th className="py-3 px-4">Value</th>
+            {renderHeader("Name", "name")}
+            {renderHeader("University", "university")}
+            {renderHeader("Category", "category")}
+            {renderHeader("Total Runs", "total_runs")}
+            {renderHeader("Balls Faced", "balls_faced")}
+            {renderHeader("Innings Played", "innings_played")}
+            {renderHeader("Wickets", "wickets")}
+            {renderHeader("Overs Bowled", "overs_bowled")}
+            {renderHeader("Runs Conceded", "runs_conceded")}
+            {isAdmin && renderHeader("Points", "points")}
+            {renderHeader("Value", "value_in_rupees")}
             {!isAdmin && <th className="py-3 px-4">Action</th>}
           </tr>
         </thead>
@@ -66,6 +83,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
             >
               <td className="py-3 px-4">{player.name}</td>
               <td className="py-3 px-4">{player.university}</td>
+              <td className="py-3 px-4">{player.category}</td>
               <td className="py-3 px-4">{player.total_runs}</td>
               <td className="py-3 px-4">{player.balls_faced}</td>
               <td className="py-3 px-4">{player.innings_played}</td>

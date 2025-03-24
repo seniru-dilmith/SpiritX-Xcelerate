@@ -1,12 +1,8 @@
-// client/src/components/leaderboard/LeaderboardControls.tsx
 import React, { ChangeEvent } from "react";
 
 interface LeaderboardControlsProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  sortBy: string;
-  sortOrder: "ASC" | "DESC";
-  onSortChange: (column: string) => void;
   pageSize: number;
   onPageSizeChange: (value: number) => void;
   currentPage: number;
@@ -18,9 +14,6 @@ interface LeaderboardControlsProps {
 const LeaderboardControls: React.FC<LeaderboardControlsProps> = ({
   searchTerm,
   onSearchChange,
-  sortBy,
-  sortOrder,
-  onSortChange,
   pageSize,
   onPageSizeChange,
   currentPage,
@@ -38,12 +31,6 @@ const LeaderboardControls: React.FC<LeaderboardControlsProps> = ({
           placeholder="Search by name..."
           className="p-2 border rounded w-full sm:w-64"
         />
-        <button
-          onClick={() => onSortChange(sortBy)}
-          className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        >
-          Order: {sortOrder}
-        </button>
       </div>
       <div className="flex items-center gap-2">
         <label className="text-sm">Rows per page:</label>
