@@ -137,20 +137,14 @@ const createPlayer = async (req, res) => {
 const getTournamentSummary = async (req, res) => {
   try {
     const players = await Player.findAll();
-    const overallRuns = players.reduce(
-      (acc, player) => acc + (player.runs || 0),
-      0
+    const overallRuns = players.reduce((acc, p) => acc + (p.total_runs || 0), 0);
+    const overallWickets = players.reduce((acc, p) => acc + (p.wickets || 0), 0);
+    const highestRunScorer = players.reduce((prev, curr) =>
+      prev.total_runs > curr.total_runs ? prev : curr,
+      { total_runs: 0 }
     );
-    const overallWickets = players.reduce(
-      (acc, player) => acc + (player.wickets || 0),
-      0
-    );
-    const highestRunScorer = players.reduce(
-      (prev, current) => (prev.runs > current.runs ? prev : current),
-      { runs: 0 }
-    );
-    const highestWicketTaker = players.reduce(
-      (prev, current) => (prev.wickets > current.wickets ? prev : current),
+    const highestWicketTaker = players.reduce((prev, curr) =>
+      prev.wickets > curr.wickets ? prev : curr,
       { wickets: 0 }
     );
     res.json({
@@ -160,11 +154,7 @@ const getTournamentSummary = async (req, res) => {
       highestWicketTaker,
     });
   } catch (err) {
-    console.log("Error in getTournamentSummary:", err);
-    res.status(500).json({
-      message: "Error fetching tournament summary",
-      error: err.message,
-    });
+    res.status(500).json({ message: "Error fetching tournament summary", error: err.message });
   }
 };
 

@@ -47,12 +47,12 @@ export const fetchAdminPlayers = (
 export const fetchPlayerStats = (id: number) =>
   API.get(`/admin/player-stats/${id}`);
 
-export const updatePlayer = (id: number, data: any) =>
+export const updatePlayer = (id: number, data: unknown) =>
   API.put(`/admin/player/${id}`, data);
 
 export const deletePlayer = (id: number) => API.delete(`/admin/player/${id}`);
 
-export const createPlayer = (data: any) => API.post("/admin/player", data);
+export const createPlayer = (data: unknown) => API.post("/admin/player", data);
 
 export const getLeaderboardForAdmin = (
   searchTerm: string,

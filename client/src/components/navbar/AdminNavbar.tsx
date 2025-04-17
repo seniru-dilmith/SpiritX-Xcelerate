@@ -27,6 +27,7 @@ const AdminNavbar: React.FC<NavbarProps> = ({ onLogout }) => {
           <Link to="/home" className="hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105" > Home </Link> 
           <Link to="/leaderboard" className="hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105" > Leaderboard </Link>
           <Link to="/admin" className="hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105" > Admin Panel </Link>
+          <Link to="/admin/summary" className="hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105" > Tournament Summary </Link>
           <button onClick={onLogout} className="hover:bg-red-600 hover:text-white text-red-400 px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105" > Logout </button>
         </div>
         {/* Hamburger icon for mobile */}
@@ -70,6 +71,7 @@ const AdminNavbar: React.FC<NavbarProps> = ({ onLogout }) => {
               <li> <Link to="/home" className="block hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300" onClick={() => setIsOpen(false)} > Home </Link> </li>
               <li> <Link to="/leaderboard" className="block hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300" onClick={() => setIsOpen(false)} > Leaderboard </Link> </li>
               <li> <Link to="/admin" className="block hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300" onClick={() => setIsOpen(false)} > Admin Panel </Link> </li>
+              <li> <Link to="/admin/summary" className="block hover:bg-amber-600 hover:text-white px-4 py-2 rounded-lg transition duration-300" onClick={() => setIsOpen(false)} > Tournament Summary </Link> </li>
               <li> <button onClick={() => { setIsOpen(false); onLogout(); }} className="w-full text-left hover:bg-red-600 hover:text-white text-red-400 px-4 py-2 rounded-lg transition duration-300" > Logout </button> </li>
             </ul>
           </motion.div>

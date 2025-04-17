@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Signup from "./pages/SignUp";
 import Login from "./pages/Login";
@@ -6,6 +7,7 @@ import Team from "./pages/Team";
 import Budget from "./pages/Budget";
 import Leaderboard from "./pages/Leaderboard";
 import AdminPanel from "./pages/AdminPanel";
+import TournamentSummary from "./pages/TournamentSummary";
 import Chatbot from "./components/chatbot/Chatbot";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
@@ -29,6 +31,8 @@ function App() {
               <Route path="/leaderboard" element={<ProtectedRoute> <Leaderboard /> </ProtectedRoute>} />
               <Route path="/chatbot" element={<ProtectedRoute> <Chatbot /> </ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute adminOnly> <AdminPanel /> </ProtectedRoute>} />
+              <Route path="/admin/summary" element={<ProtectedRoute adminOnly> <TournamentSummary /> </ProtectedRoute>}
+/>
             </Route>
             {/* Redirect any unmatched routes to /login */}
             <Route path="*" element={<Navigate to="/" replace />} />
