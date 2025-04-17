@@ -1,35 +1,46 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Signup from "./pages/SignUp";
+import Login from "./pages/Login";
+import Home from "./pages/Home";
+import Team from "./pages/Team";
+import Budget from "./pages/Budget";
+import Leaderboard from "./pages/Leaderboard";
+import AdminPanel from "./pages/AdminPanel";
+import TournamentSummary from "./pages/TournamentSummary";
+import Chatbot from "./components/chatbot/Chatbot";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthProvider } from "./context/AuthContext";
+import { LoadingProvider } from "./context/LoadingContext";
+import GlobalLoading from "./components/GlobalLoading";
+import Layout from "./Layout";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <LoadingProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <GlobalLoading />
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route element={<Layout />}>
+              <Route path="/home" element={<ProtectedRoute> <Home /> </ProtectedRoute>} />
+              <Route path="/team" element={<ProtectedRoute> <Team /> </ProtectedRoute>} />
+              <Route path="/budget" element={<ProtectedRoute> <Budget /> </ProtectedRoute>} />
+              <Route path="/leaderboard" element={<ProtectedRoute> <Leaderboard /> </ProtectedRoute>} />
+              <Route path="/chatbot" element={<ProtectedRoute> <Chatbot /> </ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute adminOnly> <AdminPanel /> </ProtectedRoute>} />
+              <Route path="/admin/summary" element={<ProtectedRoute adminOnly> <TournamentSummary /> </ProtectedRoute>}
+/>
+            </Route>
+            {/* Redirect any unmatched routes to /login */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </LoadingProvider>
+  );
 }
 
-export default App
+export default App;
